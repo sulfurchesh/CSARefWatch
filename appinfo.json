@@ -1,0 +1,18 @@
+{
+    "versionLabel": "1.0",
+    "uuid": "5998a78c-5ca2-4ecf-acd2-217b9f95d5b5",
+    "appKeys": {},
+    "longName": "RefWatch",
+    "versionCode": 1,
+    "capabilities": [
+        ""
+    ],
+    "shortName": "RefWatch",
+    "companyName": "zieglert@gmx.de",
+    "watchapp": {
+        "watchface": false
+    },
+    "resources": {
+        "media": []
+    }
+}
