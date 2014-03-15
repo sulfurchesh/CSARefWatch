@@ -2,7 +2,7 @@
     "versionLabel": "1.0",
     "uuid": "5998a78c-5ca2-4ecf-acd2-217b9f95d5b5",
     "appKeys": {},
-    "longName": "RefWatch",
+    "longName": "Referee Watch",
     "versionCode": 1,
     "capabilities": [
         ""
@@ -13,6 +13,37 @@
         "watchface": false
     },
     "resources": {
-        "media": []
+        "media": [
+            {
+                "type": "font",
+                "name": "FONT_AVERANGE_MONO_12",
+                "file": "fonts/AverageMono.ttf"
+            },
+            {
+                "type": "font",
+                "name": "FONT_AVERANGE_MONO_16",
+                "file": "fonts/AverageMono.ttf"
+            },
+            {
+                "type": "font",
+                "name": "FONT_AVERANGE_MONO_18",
+                "file": "fonts/AverageMono.ttf"
+            },
+            {
+                "type": "font",
+                "name": "FONT_AVERANGE_MONO_24",
+                "file": "fonts/AverageMono.ttf"
+            },
+            {
+                "type": "font",
+                "name": "FONT_AVERANGE_MONO_30",
+                "file": "fonts/AverageMono.ttf"
+            },
+            {
+                "type": "font",
+                "name": "FONT_AVERANGE_MONO_36",
+                "file": "fonts/AverageMono.ttf"
+            }
+        ]
     }
 }
