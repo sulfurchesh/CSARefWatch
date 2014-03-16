@@ -16,33 +16,38 @@
         "media": [
             {
                 "type": "font",
-                "name": "FONT_AVERANGE_MONO_12",
-                "file": "fonts/AverageMono.ttf"
+                "name": "FONT_UNIVERSELSE_28",
+                "file": "fonts/UniversElse-Regular.ttf"
             },
             {
                 "type": "font",
-                "name": "FONT_AVERANGE_MONO_16",
-                "file": "fonts/AverageMono.ttf"
+                "name": "FONT_UNIVERSELSE_14",
+                "file": "fonts/UniversElse-Regular.ttf"
             },
             {
                 "type": "font",
-                "name": "FONT_AVERANGE_MONO_18",
-                "file": "fonts/AverageMono.ttf"
+                "name": "FONT_UNIVERSELSE_18",
+                "file": "fonts/UniversElse-Regular.ttf"
             },
             {
                 "type": "font",
-                "name": "FONT_AVERANGE_MONO_24",
-                "file": "fonts/AverageMono.ttf"
+                "name": "FONT_UNIVERSELSE_24",
+                "file": "fonts/UniversElse-Regular.ttf"
             },
             {
                 "type": "font",
-                "name": "FONT_AVERANGE_MONO_30",
-                "file": "fonts/AverageMono.ttf"
+                "name": "FONT_UNIVERSELSE_30",
+                "file": "fonts/UniversElse-Regular.ttf"
             },
             {
                 "type": "font",
-                "name": "FONT_AVERANGE_MONO_36",
-                "file": "fonts/AverageMono.ttf"
+                "name": "FONT_UNIVERSELSE_36",
+                "file": "fonts/UniversElse-Regular.ttf"
+            },
+            {
+                "type": "font",
+                "name": "FONT_UNIVERSELSE_40",
+                "file": "fonts/UniversElse-Regular.ttf"
             }
         ]
     }
