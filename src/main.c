@@ -1,19 +1,20 @@
 #include <pebble.h>
 
 struct Game {
-  int state;
-  int play_time;
+  unsigned int state;
+  unsigned int play_time;
   int time_to_go;
-  int added_time;
-  int break_time;
-  int period;
-} game, templates[10];
+  unsigned int added_time;
+  unsigned int break_time;
+  unsigned int period;
+  unsigned int pause_reminder;
+} game = {0, 0, 2700, 0, 900, 1, 0};
 
-#define GAME_STATE_UNSTARTED 0
-#define GAME_STATE_STARTED 1
-#define GAME_STATE_PAUSED 2
-#define GAME_STATE_HALFTIME 5
-#define GAME_STATE_ENDED 9
+#define GAME_UNSTARTED 0
+#define GAME_STARTED 1
+#define GAME_PAUSED 2
+#define GAME_HALFTIME 4
+#define GAME_ENDED 8
 
   
 Window *my_window;
@@ -32,12 +33,6 @@ bool game_started = false;
 bool game_paused = false;
 bool game_ended = false;
 bool game_halftime = false;
-int play_time = 0;
-int time_to_go = 2700;
-int added_time = 0;
-int break_time = 900;
-int period = 1;
-int pause_reminder = 0;
 
 
 static void up_single_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -47,7 +42,7 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
     vibes_short_pulse();
   } else if (game_paused && !game_ended && game_started){
     text_layer_set_text(text_state_layer, "Game Running");
-    pause_reminder = 0;
+    game.pause_reminder = 0;
     game_paused = false;
     vibes_short_pulse();
   }
@@ -69,17 +64,18 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
   {
     text_layer_set_text(text_state_layer, "Setup");
   } else if (game_paused){
-    text_layer_set_text(text_state_layer, "Change +30");
-    added_time = added_time + 30;
+    text_layer_set_text(text_state_layer, "Player Change +30s");
+    game.added_time = game.added_time + 30;
+    game.time_to_go = game.time_to_go + 30;
   }
 }
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   /* Game Logic */
-  if (game_started && !game_halftime){play_time++;}
+  if (game_started && !game_halftime){game.play_time++;}
   if (game_started && !game_paused){
-    if (time_to_go > 0){
-      time_to_go--;
+    if (game.time_to_go > 0){
+      game.time_to_go--;
     } else if (!game_halftime){
       game_halftime = true;
       static const uint32_t const segments[] = { 500, 250, 500 };
@@ -93,42 +89,42 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   }
   /* Halftime */
   if (game_halftime){
-    if (break_time > 0){
-      break_time--;
-    } else if (period < 2){
-      period++;
+    if (game.break_time > 0){
+      game.break_time--;
+    } else if (game.period < 2){
+      game.period++;
       vibes_long_pulse();
       text_layer_set_text(text_state_layer, "Start Game");
       game_halftime = false;
       game_started = false;
-      play_time = 2700;
-      time_to_go = 2700;
-      added_time = 0;
+      game.play_time = 2700;
+      game.time_to_go = 2700;
+      game.added_time = 0;
     }
   }
   
   if (game_paused){
-    added_time++;
-    pause_reminder++;
+    game.added_time++;
+    game.pause_reminder++;
   }
-  if (pause_reminder >= 10){
-    pause_reminder = 0;
+  if (game.pause_reminder >= 10){
+    game.pause_reminder = 0;
     vibes_short_pulse();
   }
   /* Display */
-  snprintf(play_time_buffer, sizeof(play_time_buffer), "%.2d:%.2d",  play_time / 60, play_time % 60);
+  snprintf(play_time_buffer, sizeof(play_time_buffer), "%.2d:%.2d",  game.play_time / 60, game.play_time % 60);
   text_layer_set_text(text_game_time_layer, play_time_buffer);
   
-  snprintf(period_buffer, sizeof(period_buffer), "%d",  period);
+  snprintf(period_buffer, sizeof(period_buffer), "%d",  game.period);
   text_layer_set_text(text_period_layer, period_buffer);
   
-  snprintf(time_to_go_buffer, sizeof(time_to_go_buffer), "%.2d:%.2d", time_to_go / 60, time_to_go % 60);
+  snprintf(time_to_go_buffer, sizeof(time_to_go_buffer), "%.2d:%.2d", game.time_to_go / 60, game.time_to_go % 60);
   text_layer_set_text(text_togo_layer, time_to_go_buffer);
   
-  snprintf(added_time_buffer, sizeof(added_time_buffer), "+ %.2d:%.2d", added_time / 60, added_time % 60);
+  snprintf(added_time_buffer, sizeof(added_time_buffer), "+ %.2d:%.2d", game.added_time / 60, game.added_time % 60);
   text_layer_set_text(text_added_time_layer, added_time_buffer);
   
-  snprintf(break_time_buffer, sizeof(break_time_buffer), "P %.2d:%.2d", break_time / 60, break_time % 60 );
+  snprintf(break_time_buffer, sizeof(break_time_buffer), "P %.2d:%.2d", game.break_time / 60, game.break_time % 60 );
   text_layer_set_text(text_break_time_layer, break_time_buffer);
 }
 
