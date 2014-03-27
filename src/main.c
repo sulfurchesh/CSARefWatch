@@ -8,15 +8,29 @@ struct Game {
   unsigned int break_time;
   unsigned int period;
   unsigned int pause_reminder;
-} game = {0, 0, 2700, 0, 900, 1, 0};
+  unsigned int penalty_time;
+  unsigned int template;
+} game = {0, 0, 2700, 0, 900, 1, 0, 0, 0};
+
+typedef struct {
+  char name[15];
+  unsigned int play_time[10];
+  unsigned int break_time[10];
+  unsigned int penalty_time;
+  unsigned int period;
+} GameTemplate;
+
+const GameTemplate game_templates[] = {{"Jun 40/10 o",{2400,2400},{600,0},600,0}, {"Cup 45/15 o",{2700,2700},{900,0},0,0},{"Sen 40/10 o",{2400,2400},{600,0},0,0}, 
+  {"Vet 35/10 o",{2100,2100},{600,0},0,0}, {"Cup 45/15 m",{2700,2700,900,900},{900,300,0,0},0,0}, {"Test 4/1 o",{240,240},{60,0},30,0}};
 
 #define GAME_UNSTARTED 0
-#define GAME_STARTED 1
-#define GAME_PAUSED 2
-#define GAME_HALFTIME 4
-#define GAME_ENDED 8
+#define GAME_STARTED  (1 << 0) // Game was started or resterted
+#define GAME_PAUSED   (1 << 1) // Game is paused
+#define GAME_HALFTIME (1 << 2) // Halftime, might renamed to breake
+#define GAME_ENDED    (1 << 3) // End of the game
+#define GAME_READY    (1 << 4) // Ready to restart
 
-  
+/* Global Vars*/  
 Window *my_window;
 TextLayer *text_state_layer;
 TextLayer *text_game_time_layer;
@@ -29,41 +43,58 @@ static char period_buffer[10];
 static char time_to_go_buffer[20];
 static char added_time_buffer[20];
 static char break_time_buffer[20];
-bool game_started = false;
-bool game_paused = false;
-bool game_ended = false;
-bool game_halftime = false;
 
+void setGameTemplate(int template_no){
+  if (game.state == 0){
+    text_layer_set_text(text_state_layer, game_templates[template_no].name);
+    game.time_to_go = game_templates[template_no].play_time[game.period - 1];
+    game.break_time = game_templates[template_no].break_time[game.period - 1];
+    game.penalty_time = game_templates[template_no].penalty_time;
+  }
+}
 
 static void up_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!game_paused && !game_ended && game_started){
+  if (!(game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && (game.state & GAME_STARTED) && !(game.state & GAME_READY)){
     text_layer_set_text(text_state_layer, "Game Paused");
-    game_paused = true;
+    game.state ^= GAME_PAUSED;
     vibes_short_pulse();
-  } else if (game_paused && !game_ended && game_started){
+  } else if ((game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && (game.state & GAME_STARTED) && !(game.state & GAME_READY)){
     text_layer_set_text(text_state_layer, "Game Running");
     game.pause_reminder = 0;
-    game_paused = false;
+    game.state ^= GAME_PAUSED;
     vibes_short_pulse();
+  } else if (!(game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && !(game.state & GAME_STARTED) && (game.state & GAME_READY)){
+    game.state ^= GAME_READY;
+    game.play_time = game_templates[game.template].play_time[game.period - 1];
+    game.time_to_go = game_templates[game.template].play_time[game.period - 1];
+    game.break_time = game_templates[game.template].break_time[game.period - 1];
+    game.added_time = 0;
   }
 }
 
 static void up_long_down_click_handler(ClickRecognizerRef recognizer, void *context) {
   
-  if (!game_started)
+  if (!(game.state & GAME_STARTED))
   {
     text_layer_set_text(text_state_layer, "Game Running");
     vibes_long_pulse();
-    game_started = true;
+    game.state |= GAME_STARTED;
   }
 }
 
 static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
   
-  if (!game_started)
+  if (!(game.state & GAME_STARTED))
   {
     text_layer_set_text(text_state_layer, "Setup");
-  } else if (game_paused){
+    game.template++;
+    //if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
+    if (game.template > 5){
+      game.template = 0;
+    }
+    setGameTemplate(game.template);
+    
+  } else if (game.state & GAME_PAUSED){
     text_layer_set_text(text_state_layer, "Player Change +30s");
     game.added_time = game.added_time + 30;
     game.time_to_go = game.time_to_go + 30;
@@ -72,12 +103,11 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   /* Game Logic */
-  if (game_started && !game_halftime){game.play_time++;}
-  if (game_started && !game_paused){
+  if ((game.state & GAME_STARTED) && !(game.state & GAME_PAUSED)){
     if (game.time_to_go > 0){
       game.time_to_go--;
-    } else if (!game_halftime){
-      game_halftime = true;
+    } else if (!(game.state & GAME_HALFTIME)){
+      game.state |= GAME_HALFTIME;
       static const uint32_t const segments[] = { 500, 250, 500 };
       VibePattern pat = {
         .durations = segments,
@@ -88,22 +118,21 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     }
   }
   /* Halftime */
-  if (game_halftime){
+  if ((game.state & GAME_HALFTIME) && !(game.state & GAME_READY)){
     if (game.break_time > 0){
       game.break_time--;
-    } else if (game.period < 2){
+    //} else if (game.period < 2){
+    } else {
       game.period++;
       vibes_long_pulse();
-      text_layer_set_text(text_state_layer, "Start Game");
-      game_halftime = false;
-      game_started = false;
-      game.play_time = 2700;
-      game.time_to_go = 2700;
-      game.added_time = 0;
+      text_layer_set_text(text_state_layer, "Ready to Game");
+      game.state ^= GAME_HALFTIME;
+      game.state ^= GAME_STARTED;
+      game.state ^= GAME_READY;
     }
   }
   
-  if (game_paused){
+  if (game.state & GAME_PAUSED){
     game.added_time++;
     game.pause_reminder++;
   }
@@ -111,6 +140,8 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     game.pause_reminder = 0;
     vibes_short_pulse();
   }
+  if ((game.state & GAME_STARTED) && !(game.state & GAME_HALFTIME)){game.play_time++;}
+  
   /* Display */
   snprintf(play_time_buffer, sizeof(play_time_buffer), "%.2d:%.2d",  game.play_time / 60, game.play_time % 60);
   text_layer_set_text(text_game_time_layer, play_time_buffer);
@@ -133,6 +164,7 @@ void config_provider(void *context) {
   window_long_click_subscribe(BUTTON_ID_SELECT, 500, select_long_click_handler, NULL);
   window_long_click_subscribe(BUTTON_ID_UP, 500, up_long_down_click_handler, NULL);
 }
+
 
 void handle_init(void) {
 	/* GUI Init */
@@ -169,6 +201,8 @@ void handle_init(void) {
   /* Event Init */
   tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
   window_set_click_config_provider(my_window, config_provider);
+  
+  setGameTemplate(0);
 }
 
 void handle_deinit(void) {
