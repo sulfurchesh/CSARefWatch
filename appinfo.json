@@ -16,27 +16,12 @@
         "media": [
             {
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_28",
+                "name": "FONT_UNIVERSELSE_12",
                 "file": "fonts/UniversElse-Regular.ttf"
             },
             {
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_14",
-                "file": "fonts/UniversElse-Regular.ttf"
-            },
-            {
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_18",
-                "file": "fonts/UniversElse-Regular.ttf"
-            },
-            {
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_24",
-                "file": "fonts/UniversElse-Regular.ttf"
-            },
-            {
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_30",
+                "name": "FONT_UNIVERSELSE_40",
                 "file": "fonts/UniversElse-Regular.ttf"
             },
             {
@@ -46,7 +31,27 @@
             },
             {
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_40",
+                "name": "FONT_UNIVERSELSE_30",
+                "file": "fonts/UniversElse-Regular.ttf"
+            },
+            {
+                "type": "font",
+                "name": "FONT_UNIVERSELSE_24",
+                "file": "fonts/UniversElse-Regular.ttf"
+            },
+            {
+                "type": "font",
+                "name": "FONT_UNIVERSELSE_18",
+                "file": "fonts/UniversElse-Regular.ttf"
+            },
+            {
+                "type": "font",
+                "name": "FONT_UNIVERSELSE_14",
+                "file": "fonts/UniversElse-Regular.ttf"
+            },
+            {
+                "type": "font",
+                "name": "FONT_UNIVERSELSE_28",
                 "file": "fonts/UniversElse-Regular.ttf"
             }
         ]
