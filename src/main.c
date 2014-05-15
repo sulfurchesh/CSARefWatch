@@ -97,6 +97,9 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
         break;
       }
     }
+  // Needed cause player can shorten the breake
+  } else if ((game.state & GAME_HALFTIME) && (game.break_time > 5)){
+      game.break_time = 5;
   }
 }
 
@@ -111,9 +114,9 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
     setGameTemplate(game.template);
     
   } else if (!(game.state & GAME_ENDED) && !(game.state & GAME_PAUSED)){
-    text_layer_set_text(text_state_layer, "Player Change");
-    game.added_time = game.added_time + game.change_time;
-    game.time_to_go = game.time_to_go + game.change_time;
+      text_layer_set_text(text_state_layer, "Player Change");
+      game.added_time = game.added_time + game.change_time;
+      game.time_to_go = game.time_to_go + game.change_time;
   }
 }
 

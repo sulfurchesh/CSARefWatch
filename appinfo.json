@@ -1,59 +1,59 @@
 {
     "versionLabel": "1.0",
-    "uuid": "5998a78c-5ca2-4ecf-acd2-217b9f95d5b5",
-    "appKeys": {},
-    "longName": "Referee Watch",
-    "versionCode": 1,
-    "capabilities": [
-        ""
-    ],
-    "shortName": "RefWatch",
-    "companyName": "zieglert@gmx.de",
     "watchapp": {
         "watchface": false
     },
+    "capabilities": [
+        ""
+    ],
+    "appKeys": {},
+    "longName": "Referee Watch",
+    "shortName": "RefWatch",
     "resources": {
         "media": [
             {
+                "file": "fonts/UniversElse-Regular.ttf",
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_12",
-                "file": "fonts/UniversElse-Regular.ttf"
+                "name": "FONT_UNIVERSELSE_28"
             },
             {
+                "file": "fonts/UniversElse-Regular.ttf",
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_40",
-                "file": "fonts/UniversElse-Regular.ttf"
+                "name": "FONT_UNIVERSELSE_14"
             },
             {
+                "file": "fonts/UniversElse-Regular.ttf",
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_36",
-                "file": "fonts/UniversElse-Regular.ttf"
+                "name": "FONT_UNIVERSELSE_18"
             },
             {
+                "file": "fonts/UniversElse-Regular.ttf",
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_30",
-                "file": "fonts/UniversElse-Regular.ttf"
+                "name": "FONT_UNIVERSELSE_24"
             },
             {
+                "file": "fonts/UniversElse-Regular.ttf",
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_24",
-                "file": "fonts/UniversElse-Regular.ttf"
+                "name": "FONT_UNIVERSELSE_30"
             },
             {
+                "file": "fonts/UniversElse-Regular.ttf",
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_18",
-                "file": "fonts/UniversElse-Regular.ttf"
+                "name": "FONT_UNIVERSELSE_36"
             },
             {
+                "file": "fonts/UniversElse-Regular.ttf",
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_14",
-                "file": "fonts/UniversElse-Regular.ttf"
+                "name": "FONT_UNIVERSELSE_40"
             },
             {
+                "file": "fonts/UniversElse-Regular.ttf",
                 "type": "font",
-                "name": "FONT_UNIVERSELSE_28",
-                "file": "fonts/UniversElse-Regular.ttf"
+                "name": "FONT_UNIVERSELSE_12"
             }
         ]
-    }
+    },
+    "versionCode": 1,
+    "companyName": "zieglert@gmx.de",
+    "uuid": "5998a78c-5ca2-4ecf-acd2-217b9f95d5b5"
 }
