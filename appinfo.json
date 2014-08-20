@@ -1,59 +1,66 @@
 {
-    "versionLabel": "1.0",
-    "watchapp": {
-        "watchface": false
-    },
+    "appKeys": {},
     "capabilities": [
         ""
     ],
-    "appKeys": {},
+    "companyName": "Thomas Ziegler",
     "longName": "Referee Watch",
-    "shortName": "RefWatch",
+    "projectType": "native",
     "resources": {
         "media": [
             {
-                "file": "fonts/UniversElse-Regular.ttf",
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_28"
+                "file": "images/Refwatch_icon.png",
+                "menuIcon": true,
+                "name": "APP_ICON",
+                "type": "png"
             },
             {
                 "file": "fonts/UniversElse-Regular.ttf",
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_14"
+                "name": "FONT_UNIVERSELSE_28",
+                "type": "font"
             },
             {
                 "file": "fonts/UniversElse-Regular.ttf",
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_18"
+                "name": "FONT_UNIVERSELSE_14",
+                "type": "font"
             },
             {
                 "file": "fonts/UniversElse-Regular.ttf",
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_24"
+                "name": "FONT_UNIVERSELSE_18",
+                "type": "font"
             },
             {
                 "file": "fonts/UniversElse-Regular.ttf",
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_30"
+                "name": "FONT_UNIVERSELSE_24",
+                "type": "font"
             },
             {
                 "file": "fonts/UniversElse-Regular.ttf",
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_36"
+                "name": "FONT_UNIVERSELSE_30",
+                "type": "font"
             },
             {
                 "file": "fonts/UniversElse-Regular.ttf",
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_40"
+                "name": "FONT_UNIVERSELSE_36",
+                "type": "font"
             },
             {
                 "file": "fonts/UniversElse-Regular.ttf",
-                "type": "font",
-                "name": "FONT_UNIVERSELSE_12"
+                "name": "FONT_UNIVERSELSE_40",
+                "type": "font"
+            },
+            {
+                "file": "fonts/UniversElse-Regular.ttf",
+                "name": "FONT_UNIVERSELSE_12",
+                "type": "font"
             }
         ]
     },
+    "shortName": "RefWatch",
+    "uuid": "5998a78c-5ca2-4ecf-acd2-217b9f95d5b5",
     "versionCode": 1,
-    "companyName": "zieglert@gmx.de",
-    "uuid": "5998a78c-5ca2-4ecf-acd2-217b9f95d5b5"
+    "versionLabel": "1.1",
+    "watchapp": {
+        "watchface": false
+    }
 }

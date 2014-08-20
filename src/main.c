@@ -23,7 +23,7 @@ typedef struct {
   unsigned int period;
 } GameTemplate;
 
-const GameTemplate game_templates[] = {{"Jun 40/10 o",{2400,2400},{600,0},600,0,0}, {"Cup 45/15 o",{2700,2700},{900,0},0,30,0},{"Sen 40/10 o",{2400,2400},{600,0},0,30,0}, 
+const GameTemplate game_templates[] = {{"Jun 40/10 o",{2400,2400},{600,0},600,0,0}, {"Jun 45/15 o",{2700,2700},{900,0},600,0,0}, {"Cup 45/15 o",{2700,2700},{900,0},0,30,0},{"Sen 40/10 o",{2400,2400},{600,0},0,30,0}, 
   {"Vet 35/10 o",{2100,2100},{600,0},0,30,0}, {"Cup 45/15 m",{2700,2700,900,900},{900,300,0,0},0,30,0}, {"Test 4/1 o",{240,240},{60,0},20,10,0}};
 
 #define GAME_UNSTARTED 0
@@ -108,7 +108,7 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
   if (!(game.state & GAME_STARTED)){
     game.template++;
     // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
-    if (game.template > 5){
+    if (game.template > 6){
       game.template = 0;
     }
     setGameTemplate(game.template);
