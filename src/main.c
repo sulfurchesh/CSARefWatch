@@ -103,6 +103,20 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
   }
 }
 
+static void up_double_click(ClickRecognizerRef recognizer, void *context){
+  if ((game.state & GAME_HALFTIME) && !(game.state & GAME_READY)){
+    game.period++;
+    game.play_time = game_templates[game.template].play_time[game.period - 1];
+    game.time_to_go = game_templates[game.template].play_time[game.period - 1];
+    game.break_time = game_templates[game.template].break_time[game.period - 1];
+    game.added_time = 0;
+    text_layer_set_text(text_state_layer, "Ready to Play");
+    game.state ^= GAME_HALFTIME;
+    game.state ^= GAME_STARTED;
+    game.state ^= GAME_READY;
+  }
+}
+
 static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
   
   if (!(game.state & GAME_STARTED)){
@@ -205,6 +219,7 @@ void config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, up_single_click_handler);
   window_long_click_subscribe(BUTTON_ID_SELECT, 500, select_long_click_handler, NULL);
   window_long_click_subscribe(BUTTON_ID_UP, 500, up_long_click_handler, NULL);
+  window_multi_click_subscribe(BUTTON_ID_UP, 2, 0, 500, true, up_double_click);
 }
 
 
