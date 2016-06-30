@@ -12,7 +12,7 @@ struct Game {
   unsigned int change_time;
   unsigned int template;
   unsigned int penalty_times[6];
-} game = {0, 0, 2400, 0, 600, 1, 0, 0, 0, 0, {0,0,0,0,0,0}};
+} game = {0, 0, 2700, 0, 600, 1, 0, 0, 0, 0, {0,0,0,0,0,0}};
 
 typedef struct {
   char name[15];
@@ -23,8 +23,31 @@ typedef struct {
   unsigned int period;
 } GameTemplate;
 
-const GameTemplate game_templates[] = {{"Jun 40/10 o",{2400,2400},{600,0},600,0,0}, {"Jun 45/15 o",{2700,2700},{900,0},600,0,0}, {"Cup 45/15 o",{2700,2700},{900,0},0,30,0},{"Sen 40/10 o",{2400,2400},{600,0},0,30,0}, 
-  {"Vet 35/10 o",{2100,2100},{600,0},0,30,0}, {"Cup 45/15 m",{2700,2700,900,900},{900,300,0,0},0,30,0}, {"Test 4/1 o",{240,240},{60,0},20,10,0}};
+const GameTemplate game_templates[] = {
+	{"2x45/5    ",{2700,2700},{300,0},0,0,0},                /* 2 periods of 45m, 5m HT  */
+	{"2x45+10/5 ",{2700,2700,600,600},{300,300,0,0},0,0,0},  /* 2 periods of 45m, 2x10 ET, 5m HT */
+	{"L1O 45/15 ",{2700,2700},{900,0},0,30,0},               /* 2 periods of 45m, 15m HT */
+	{"OPDL 13/14",{1500,1500,1500},{480,480,0},0,30,0},      /* 3 periods of 25m, 8m HT  */
+	{"OPDL 15+  ",{2400,2400},{600,0},0,30,0},               /* 2 periods of 40m, 10m HT */
+	{"2x25/5    ",{1500,1500},{300,0},0,0,0},                /* 2x25, 5m */
+	{"2x30/5    ",{1800,1800},{300,0},0,0,0},                /* 2x30, 5m */
+	{"2x35/5    ",{2100,2100},{300,0},0,0,0},                /* 2x35, 5m */
+	{"2x40/5    ",{2400,2400},{300,0},0,0,0},                /* 2x40, 5m */
+	{"4x12/252  ",{720,720,720,720},{120,300,120,0},0,0,0}   /* 4x12, HT: 2m, 5m, 2m */
+	{"4x15/252  ",{900,900,900,900},{120,300,120,0},0,0,0}   /* 4x15, HT: 2m, 5m, 2m */
+	{"Test 4/1 o",{240,240},{60,0},20,10,0}
+};
+
+/*
+const GameTemplate game_templates[] = {
+{{"Jun 40/10 o",{2400,2400},{600,0},600,0,0},
+ {"Jun 45/15 o",{2700,2700},{900,0},600,0,0},
+ {"Cup 45/15 o",{2700,2700},{900,0},0,30,0},
+ {"Sen 40/10 o",{2400,2400},{600,0},0,30,0}, 
+ {"Vet 35/10 o",{2100,2100},{600,0},0,30,0},
+ {"Cup 45/15 m",{2700,2700,900,900},{900,300,0,0},0,30,0},
+ };
+*/
 
 #define GAME_UNSTARTED 0
 #define GAME_STARTED  (1 << 0) // Game was started or resterted
@@ -82,7 +105,6 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
 }
 
 static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-  
   if (!(game.state & GAME_STARTED) && !(game.state & GAME_ENDED) && !(game.state & GAME_HALFTIME) && !(game.state & GAME_READY)){
     text_layer_set_text(text_state_layer, "Game Running");
     vibes_long_pulse();
@@ -224,12 +246,12 @@ void config_provider(void *context) {
 
 
 void handle_init(void) {
-	/* GUI Init */
+  /* GUI Init */
   my_window = window_create();
   window_stack_push(my_window, true /* Animated */);
   Layer *window_layer = window_get_root_layer(my_window);
   /* Text Layer*/
-	text_state_layer = text_layer_create(GRect(0, 0, 144, 15));
+  text_state_layer = text_layer_create(GRect(0, 0, 144, 15));
   text_game_time_layer = text_layer_create(GRect(20, 15, 144, 65));
   text_period_layer = text_layer_create(GRect(0, 25, 20, 65));
   text_togo_layer = text_layer_create(GRect(0, 75, 72, 105));
@@ -265,13 +287,13 @@ void handle_init(void) {
 }
 
 void handle_deinit(void) {
-	text_layer_destroy(text_state_layer);
+  text_layer_destroy(text_state_layer);
   text_layer_destroy(text_game_time_layer);
-	window_destroy(my_window);
+  window_destroy(my_window);
 }
 
 int main(void) {
-	handle_init();
-	app_event_loop();
-	handle_deinit();
+  handle_init();
+  app_event_loop();
+  handle_deinit();
 }
