@@ -39,7 +39,7 @@ const GameTemplate game_templates[] = {
   {"Test 4/1 p",{240,240},{60,0},20,10,0}                  /* 12: TEST. 2x4, HT: 1m, penalties HIDDEN */
 };
 /* Define the number of templates above, not including the Test template */
-#define NrTemplates 11
+#define NrTemplates 12
 
 /*
 const GameTemplate game_templates[] = {
