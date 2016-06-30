@@ -154,10 +154,10 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
     setGameTemplate(game.template);
   } else if (!(game.state & GAME_ENDED) && !(game.state & GAME_PAUSED)) {
       text_layer_set_text(text_state_layer, "Player Change");
-      // TODO: Reset away from this...
+      // TODO: Reset away from this text...
       game.added_time = game.added_time + game.change_time;
-      // We don't want to add to time remaining. That bad.
-      // game.time_to_go = game.time_to_go + game.change_time;
+      // We add the time to the "to_go", because the countdown ISN'T stopped...
+      game.time_to_go = game.time_to_go + game.change_time;
   }
 }
 
