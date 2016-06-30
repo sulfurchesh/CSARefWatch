@@ -24,6 +24,7 @@ typedef struct {
 } GameTemplate;
 
 const GameTemplate game_templates[] = {
+  {"Test 4/1 o",{240,240},{60,0},0,10,0},                  /* 11: TEST. 2x4, HT: 1m */
   {"2x45/5    ",{2700,2700},{300,0},0,0,0},                /*  0: 2x45, HT: 5m */
   {"2x45+10/5 ",{2700,2700,600,600},{300,300,0,0},0,0,0},  /*  1: 2x45, 2x10 ET, HT: 5m */
   {"L1O 45/15 ",{2700,2700},{900,0},0,30,0},               /*  2: L1O - 2x45, HT: 15m */
@@ -35,7 +36,6 @@ const GameTemplate game_templates[] = {
   {"2x40/5    ",{2400,2400},{300,0},0,0,0},                /*  8: 2x40, HT: 5m */
   {"4x12/252  ",{720,720,720,720},{120,300,120,0},0,0,0},  /*  9: 4x12, HT: 2m, 5m, 2m */
   {"4x15/252  ",{900,900,900,900},{120,300,120,0},0,0,0},  /* 10: 4x15, HT: 2m, 5m, 2m */
-  {"Test 4/1 o",{240,240},{60,0},0,10,0},                  /* 11: TEST. 2x4, HT: 1m */
   {"Test 4/1 p",{240,240},{60,0},20,10,0}                  /* 12: TEST. 2x4, HT: 1m, penalties HIDDEN */
 };
 /* Define the number of templates above, not including the Test template */
@@ -154,8 +154,10 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
     setGameTemplate(game.template);
   } else if (!(game.state & GAME_ENDED) && !(game.state & GAME_PAUSED)) {
       text_layer_set_text(text_state_layer, "Player Change");
+      // TODO: Reset away from this...
       game.added_time = game.added_time + game.change_time;
-      game.time_to_go = game.time_to_go + game.change_time;
+      // We don't want to add to time remaining. That bad.
+      // game.time_to_go = game.time_to_go + game.change_time;
   }
 }
 
