@@ -37,6 +37,8 @@ const GameTemplate game_templates[] = {
   {"4x15/252  ",{900,900,900,900},{120,300,120,0},0,0,0},  /* 4x15, HT: 2m, 5m, 2m */
   {"Test 4/1 o",{240,240},{60,0},20,10,0}                  /* TEST. 2x4, HT: 1m, penalties */
 };
+/* Define the number of templates above, not including the Test template */
+#define NrTemplates 11
 
 /*
 const GameTemplate game_templates[] = {
@@ -46,6 +48,7 @@ const GameTemplate game_templates[] = {
  {"Sen 40/10 o",{2400,2400},{600,0},0,30,0}, 
  {"Vet 35/10 o",{2100,2100},{600,0},0,30,0},
  {"Cup 45/15 m",{2700,2700,900,900},{900,300,0,0},0,30,0},
+ {"Test 4/1 o",{240,240},{60,0},20,10,0}
  };
 */
 
@@ -144,7 +147,7 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
   if (!(game.state & GAME_STARTED)){
     game.template++;
     // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
-    if (game.template > 6){
+    if (game.template > NrTemplates) {
       game.template = 0;
     }
     setGameTemplate(game.template);
@@ -243,7 +246,6 @@ void config_provider(void *context) {
   window_long_click_subscribe(BUTTON_ID_UP, 500, up_long_click_handler, NULL);
   window_multi_click_subscribe(BUTTON_ID_UP, 2, 0, 500, true, up_double_click);
 }
-
 
 void handle_init(void) {
   /* GUI Init */
