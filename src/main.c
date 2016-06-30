@@ -35,7 +35,8 @@ const GameTemplate game_templates[] = {
   {"2x40/5    ",{2400,2400},{300,0},0,0,0},                /*  8: 2x40, HT: 5m */
   {"4x12/252  ",{720,720,720,720},{120,300,120,0},0,0,0},  /*  9: 4x12, HT: 2m, 5m, 2m */
   {"4x15/252  ",{900,900,900,900},{120,300,120,0},0,0,0},  /* 10: 4x15, HT: 2m, 5m, 2m */
-  {"Test 4/1 o",{240,240},{60,0},20,10,0}                  /* 11: TEST. 2x4, HT: 1m, penalties */
+  {"Test 4/1 o",{240,240},{60,0},0,10,0}                   /* 11: TEST. 2x4, HT: 1m */
+  {"Test 4/1 p",{240,240},{60,0},20,10,0}                  /* 12: TEST. 2x4, HT: 1m, penalties HIDDEN */
 };
 /* Define the number of templates above, not including the Test template */
 #define NrTemplates 11
@@ -75,7 +76,7 @@ static char added_time_buffer[20];
 static char break_time_buffer[20];
 static char penalty_buffer[80];
 
-void setGameTemplate(int template_no){
+void setGameTemplate(int template_no) {
   if (game.state == 0){
     text_layer_set_text(text_state_layer, game_templates[template_no].name);
     game.time_to_go = game_templates[template_no].play_time[game.period - 1];
@@ -89,16 +90,16 @@ void setGameTemplate(int template_no){
 }
 
 static void up_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!(game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && (game.state & GAME_STARTED) && !(game.state & GAME_READY)){
+  if (!(game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && (game.state & GAME_STARTED) && !(game.state & GAME_READY)) {
     text_layer_set_text(text_state_layer, "Game Paused");
     game.state ^= GAME_PAUSED;
     vibes_short_pulse();
-  } else if ((game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && (game.state & GAME_STARTED) && !(game.state & GAME_READY)){
+  } else if ((game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && (game.state & GAME_STARTED) && !(game.state & GAME_READY)) {
     text_layer_set_text(text_state_layer, "Game Running");
     game.pause_reminder = 0;
     game.state ^= GAME_PAUSED;
     vibes_short_pulse();
-  } else if (!(game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && !(game.state & GAME_STARTED) && (game.state & GAME_READY)){
+  } else if (!(game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && !(game.state & GAME_STARTED) && (game.state & GAME_READY)) {
     game.state ^= GAME_READY;
     game.play_time = game_templates[game.template].play_time[game.period - 1];
     game.time_to_go = game_templates[game.template].play_time[game.period - 1];
@@ -108,11 +109,12 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
 }
 
 static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!(game.state & GAME_STARTED) && !(game.state & GAME_ENDED) && !(game.state & GAME_HALFTIME) && !(game.state & GAME_READY)){
+  if (!(game.state & GAME_STARTED) && !(game.state & GAME_ENDED) && !(game.state & GAME_HALFTIME) && !(game.state & GAME_READY)) {
     text_layer_set_text(text_state_layer, "Game Running");
     vibes_long_pulse();
     game.state |= GAME_STARTED;
-  } else if ((game.state & GAME_STARTED) && !(game.state & GAME_ENDED) && !(game.state & GAME_PAUSED) && !(game.state & GAME_HALFTIME) && !(game.state & GAME_READY)){
+  } else if (game.penalty_time != 0 && (game.state & GAME_STARTED) && !(game.state & GAME_ENDED) && !(game.state & GAME_PAUSED) &&
+           !(game.state & GAME_HALFTIME) && !(game.state & GAME_READY)) {
     text_layer_set_text(text_state_layer, "Time Penalty");
     int i;
     for(i = 0; i < 6; i++){
@@ -122,14 +124,14 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
         break;
       }
     }
-  // Needed cause player can shorten the breake
-  } else if ((game.state & GAME_HALFTIME) && (game.break_time > 5)){
+  } else if ((game.state & GAME_HALFTIME) && (game.break_time > 5)) {
+      // Needed cause player can shorten the break
       game.break_time = 5;
   }
 }
 
-static void up_double_click(ClickRecognizerRef recognizer, void *context){
-  if ((game.state & GAME_HALFTIME) && !(game.state & GAME_READY)){
+static void up_double_click(ClickRecognizerRef recognizer, void *context) {
+  if ((game.state & GAME_HALFTIME) && !(game.state & GAME_READY)) {
     game.period++;
     game.play_time = game_templates[game.template].play_time[game.period - 1];
     game.time_to_go = game_templates[game.template].play_time[game.period - 1];
@@ -143,16 +145,14 @@ static void up_double_click(ClickRecognizerRef recognizer, void *context){
 }
 
 static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-  
-  if (!(game.state & GAME_STARTED)){
+  if (!(game.state & GAME_STARTED)) {
     game.template++;
     // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
     if (game.template > NrTemplates) {
       game.template = 0;
     }
     setGameTemplate(game.template);
-    
-  } else if (!(game.state & GAME_ENDED) && !(game.state & GAME_PAUSED)){
+  } else if (!(game.state & GAME_ENDED) && !(game.state & GAME_PAUSED)) {
       text_layer_set_text(text_state_layer, "Player Change");
       game.added_time = game.added_time + game.change_time;
       game.time_to_go = game.time_to_go + game.change_time;
@@ -161,12 +161,12 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   /* Game Logic */
-  if ((game.state & GAME_STARTED) && !(game.state & GAME_PAUSED)){
-    if (game.time_to_go > 0){
+  if ((game.state & GAME_STARTED) && !(game.state & GAME_PAUSED)) {
+    if (game.time_to_go > 0) {
       game.time_to_go--;
-    } else if (!(game.state & GAME_HALFTIME)){
+    } else if (!(game.state & GAME_HALFTIME)) {
       game.state |= GAME_HALFTIME;
-      static const uint32_t const segments[] = { 500, 250, 500, 250, 500};
+      static const uint32_t const segments[] = { 500, 250, 500, 250, 500 };
       VibePattern pat = {
         .durations = segments,
         .num_segments = ARRAY_LENGTH(segments),
@@ -176,8 +176,8 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     }
   }
   /* Halftime */
-  if ((game.state & GAME_HALFTIME) && !(game.state & GAME_READY)){
-    if (game.break_time > 0){
+  if ((game.state & GAME_HALFTIME) && !(game.state & GAME_READY)) {
+    if (game.break_time > 0) {
       game.break_time--;
     } else {
       game.period++;
@@ -189,21 +189,21 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     }
   }
   
-  if (game.state & GAME_PAUSED){
+  if (game.state & GAME_PAUSED) {
     game.added_time++;
     game.pause_reminder++;
   }
-  if (game.pause_reminder >= 10){
+  if (game.pause_reminder >= 10) {
     game.pause_reminder = 0;
     vibes_short_pulse();
   }
-  if ((game.state & GAME_STARTED) && !(game.state & GAME_HALFTIME)){
+  if ((game.state & GAME_STARTED) && !(game.state & GAME_HALFTIME)) {
     game.play_time++;
-    if (game.penalty_time > 0){
+    if (game.penalty_time > 0) {
       int i;
       for(i = 0; i < 6; i++){
-        if (game.penalty_times[i] > 0){
-          if (game.penalty_times[i] == 1){
+        if (game.penalty_times[i] > 0) {
+          if (game.penalty_times[i] == 1) {
             vibes_long_pulse();
           }
           game.penalty_times[i]--;
@@ -228,11 +228,11 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   snprintf(break_time_buffer, sizeof(break_time_buffer), "P %.2d:%.2d", game.break_time / 60, game.break_time % 60 );
   text_layer_set_text(text_break_time_layer, break_time_buffer);
   
-  if (game.penalty_time > 0){
+  if (game.penalty_time > 0) {
     typedef char string[10];
     static string temp_penalty_buffer[6];
     int i;
-    for(i = 0; i < 6; i++){
+    for(i = 0; i < 6; i++) {
       snprintf((temp_penalty_buffer[i]), sizeof(string), "%d: %.2d:%.2d", i + 1, game.penalty_times[i] / 60, game.penalty_times[i] % 60);
     }
     snprintf(penalty_buffer, sizeof(penalty_buffer), " %s   %s\n %s   %s\n %s   %s", temp_penalty_buffer[0], temp_penalty_buffer[1], temp_penalty_buffer[2], temp_penalty_buffer[3], temp_penalty_buffer[4], temp_penalty_buffer[5]);
