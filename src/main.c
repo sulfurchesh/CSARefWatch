@@ -60,6 +60,11 @@ const GameTemplate game_templates[] = {
 #define GAME_ENDED    (1 << 3) // End of the game
 #define GAME_READY    (1 << 4) // Ready to restart
 
+#define SET_LENGTH     1
+#define PERIODS        2
+#define HT_LENGTH      3
+#define ET_LENGTH      4
+
 /* Global Vars*/  
 Window *my_window;
 TextLayer *text_state_layer;
@@ -86,6 +91,17 @@ void setGameTemplate(int template_no) {
       text_layer_set_text(text_penalty_time_layer, "");
     }
     game.change_time = game_templates[template_no].change_time;
+  }
+}
+
+static void down_single_click_handler(ClickRecognizerRef recognizer, void *context) {
+  if (!(game.state & GAME_STARTED)) {
+    game.template++;
+    // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
+    if (game.template > NrTemplates) {
+      game.template = 0;
+    }
+    setGameTemplate(game.template);
   }
 }
 
@@ -244,6 +260,7 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 
 void config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, up_single_click_handler);
+  window_single_click_subscribe(BUTTON_ID_DOWN, down_single_click_handler);
   window_long_click_subscribe(BUTTON_ID_SELECT, 500, select_long_click_handler, NULL);
   window_long_click_subscribe(BUTTON_ID_UP, 500, up_long_click_handler, NULL);
   window_multi_click_subscribe(BUTTON_ID_UP, 2, 0, 500, true, up_double_click);
