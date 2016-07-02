@@ -102,6 +102,8 @@ static void down_single_click_handler(ClickRecognizerRef recognizer, void *conte
       game.template = 0;
     }
     setGameTemplate(game.template);
+  } else {
+    text_layer_set_text(text_state_layer, "Game...");
   }
 }
 
@@ -253,7 +255,8 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     for(i = 0; i < 6; i++) {
       snprintf((temp_penalty_buffer[i]), sizeof(string), "%d: %.2d:%.2d", i + 1, game.penalty_times[i] / 60, game.penalty_times[i] % 60);
     }
-    snprintf(penalty_buffer, sizeof(penalty_buffer), " %s   %s\n %s   %s\n %s   %s", temp_penalty_buffer[0], temp_penalty_buffer[1], temp_penalty_buffer[2], temp_penalty_buffer[3], temp_penalty_buffer[4], temp_penalty_buffer[5]);
+    snprintf(penalty_buffer, sizeof(penalty_buffer), " %s   %s\n %s   %s\n %s   %s", temp_penalty_buffer[0], temp_penalty_buffer[1],
+             temp_penalty_buffer[2], temp_penalty_buffer[3], temp_penalty_buffer[4], temp_penalty_buffer[5]);
     text_layer_set_text(text_penalty_time_layer, penalty_buffer);
   }
 }
