@@ -26,8 +26,8 @@ typedef struct {
 const GameTemplate game_templates[] = {
   {"Test 2/1 o",{120,120},{30,0},0,10,0},                  /* 11: TEST. 2x4, HT: 1m */
   {"2x45/5    ",{2700,2700},{300,0},0,0,0},                /*  0: 2x45, HT: 5m */
-  {"2x45+10/5 ",{2700,2700,600,600},{300,300,0,0},0,0,0},  /*  1: 2x45, 2x10 ET, HT: 5m */
-  {"L1O 45/15 ",{2700,2700},{900,0},0,30,0},               /*  2: L1O - 2x45, HT: 15m */
+  {"L1O 45/15 ",{2700,2700},{900,0},0,30,0},               /*  1: L1O - 2x45, HT: 15m */
+  {"2x45+10/5 ",{2700,2700,600,600},{300,300,0,0},0,0,0},  /*  2: 2x45, 2x10 ET, HT: 5m */
   {"OPDL 13/14",{1500,1500,1500},{480,480,0},0,30,0},      /*  3: OPDL U13/14 - 3x25, HT: 8m */
   {"OPDL 15+  ",{2400,2400},{600,0},0,30,0},               /*  4: OPDL U15/16 - 2x40, HT: 10m */
   {"2x25/5    ",{1500,1500},{300,0},0,0,0},                /*  5: 2x25, HT: 5m */
@@ -39,19 +39,7 @@ const GameTemplate game_templates[] = {
   {"Test 4/1 p",{240,240},{60,0},20,10,0}                  /* 12: TEST. 2x4, HT: 1m, penalties HIDDEN */
 };
 /* Define the number of templates above, not including the Test template */
-#define NrTemplates 11
-
-/*
-const GameTemplate game_templates[] = {
-{{"Jun 40/10 o",{2400,2400},{600,0},600,0,0},
- {"Jun 45/15 o",{2700,2700},{900,0},600,0,0},
- {"Cup 45/15 o",{2700,2700},{900,0},0,30,0},
- {"Sen 40/10 o",{2400,2400},{600,0},0,30,0}, 
- {"Vet 35/10 o",{2100,2100},{600,0},0,30,0},
- {"Cup 45/15 m",{2700,2700,900,900},{900,300,0,0},0,30,0},
- {"Test 4/1 o",{240,240},{60,0},20,10,0}
- };
-*/
+#define NrTemplates 2
 
 #define GAME_UNSTARTED 0
 #define GAME_STARTED  (1 << 0) // Game was started or resterted
@@ -164,6 +152,8 @@ static void up_double_click(ClickRecognizerRef recognizer, void *context) {
 
 static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (!(game.state & GAME_STARTED)) {
+    // TODO: Let's change this around entirely and put us into "GAME_SET" mode now.
+    //       If in GAME_SET mode, let's just exit
     game.template++;
     // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
     if (game.template > NrTemplates) {
