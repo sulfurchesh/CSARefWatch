@@ -107,13 +107,13 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
     SET_BIT(game.state, GAME_PAUSED);
     vibes_short_pulse();
   } else if (IS_SET(game.state, GAME_PAUSED)) && !IS_SET(game.state, GAME_ENDED) &&
-             IS_SET(game.state & GAME_STARTED) && !IS_SET(game.state, GAME_READY)) {
+             IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_READY)) {
     text_layer_set_text(text_state_layer, "Game Running");
     game.pause_reminder = 0;
     REMOVE_BIT(game.state, GAME_PAUSED);
     vibes_short_pulse();
   } else if (!IS_SET(game.state, GAME_PAUSED) && !IS_SET(game.state, GAME_ENDED) &&
-             !IS_SET(game.state, GAME_STARTED) && IS_SET(game.state & GAME_READY)) {
+             !IS_SET(game.state, GAME_STARTED) && IS_SET(game.state, GAME_READY)) {
     REMOVE_BIT(game.state, GAME_READY);
     game.play_time = game_templates[game.template].play_time[game.period - 1];
     game.time_to_go = game_templates[game.template].play_time[game.period - 1];
