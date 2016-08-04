@@ -128,6 +128,7 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
     text_layer_set_text(text_state_layer, "Game Running");
     vibes_long_pulse();
     SET_BIT(game.state, GAME_STARTED);
+    REMOVE_BIT(game.state, GAME_READY);
   } else if (game.penalty_time != 0 && IS_SET(game.state, GAME_STARTED) &&
              !IS_SET(game.state, GAME_ENDED) && !IS_SET(game.state, GAME_PAUSED) &&
              !IS_SET(game.state, GAME_HALFTIME) && !IS_SET(game.state, GAME_READY)) {
