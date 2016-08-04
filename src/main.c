@@ -44,7 +44,7 @@ const GameTemplate game_templates[] = {
 #define GAME_UNSTARTED 0
 #define GAME_STARTED  (1 << 0) // Game was started or resterted
 #define GAME_PAUSED   (1 << 1) // Game is paused
-#define GAME_HALFTIME (1 << 2) // Halftime, might renamed to breake
+#define GAME_HALFTIME (1 << 2) // Halftime, might renamed to brake
 #define GAME_ENDED    (1 << 3) // End of the game
 #define GAME_READY    (1 << 4) // Ready to restart
 
@@ -52,6 +52,11 @@ const GameTemplate game_templates[] = {
 #define PERIODS        2
 #define HT_LENGTH      3
 #define ET_LENGTH      4
+
+#define IS_SET(flag,bit)  ((flag) & (bit))
+#define SET_BIT(var,bit)  ((var) |= (bit))
+#define REMOVE_BIT(var,bit)  ((var) &= ~(bit))
+#define TOGGLE_BIT(var,bit) ((var) = (var) ^ (bit))
 
 /* Global Vars*/  
 Window *my_window;
@@ -83,7 +88,7 @@ void setGameTemplate(int template_no) {
 }
 
 static void down_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!(game.state & GAME_STARTED)) {
+  if (!(IS_SET(game.state, GAME_STARTED))) {
     game.template++;
     // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
     if (game.template > NrTemplates) {
@@ -96,17 +101,20 @@ static void down_single_click_handler(ClickRecognizerRef recognizer, void *conte
 }
 
 static void up_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!(game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && (game.state & GAME_STARTED) && !(game.state & GAME_READY)) {
+  if (!IS_SET(game.state, GAME_PAUSED) && !IS_SET(game.state, GAME_ENDED) &&
+       IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_READY)) {
     text_layer_set_text(text_state_layer, "Game Paused");
-    game.state ^= GAME_PAUSED;
+    SET_BIT(game.state, GAME_PAUSED);
     vibes_short_pulse();
-  } else if ((game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && (game.state & GAME_STARTED) && !(game.state & GAME_READY)) {
+  } else if (IS_SET(game.state, GAME_PAUSED)) && !IS_SET(game.state, GAME_ENDED) &&
+             IS_SET(game.state & GAME_STARTED) && !IS_SET(game.state, GAME_READY)) {
     text_layer_set_text(text_state_layer, "Game Running");
     game.pause_reminder = 0;
-    game.state ^= GAME_PAUSED;
+    REMOVE_BIT(game.state, GAME_PAUSED);
     vibes_short_pulse();
-  } else if (!(game.state & GAME_PAUSED) && !(game.state & GAME_ENDED) && !(game.state & GAME_STARTED) && (game.state & GAME_READY)) {
-    game.state ^= GAME_READY;
+  } else if (!IS_SET(game.state, GAME_PAUSED) && !IS_SET(game.state, GAME_ENDED) &&
+             !IS_SET(game.state, GAME_STARTED) && IS_SET(game.state & GAME_READY)) {
+    REMOVE_BIT(game.state, GAME_READY);
     game.play_time = game_templates[game.template].play_time[game.period - 1];
     game.time_to_go = game_templates[game.template].play_time[game.period - 1];
     game.break_time = game_templates[game.template].break_time[game.period - 1];
@@ -115,12 +123,14 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
 }
 
 static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!(game.state & GAME_STARTED) && !(game.state & GAME_ENDED) && !(game.state & GAME_HALFTIME) && !(game.state & GAME_READY)) {
+  if ((!IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_ENDED) &&
+      !IS_SET(game.state, GAME_HALFTIME)) || IS_SET(game.state, GAME_READY)) {
     text_layer_set_text(text_state_layer, "Game Running");
     vibes_long_pulse();
-    game.state |= GAME_STARTED;
-  } else if (game.penalty_time != 0 && (game.state & GAME_STARTED) && !(game.state & GAME_ENDED) && !(game.state & GAME_PAUSED) &&
-           !(game.state & GAME_HALFTIME) && !(game.state & GAME_READY)) {
+    SET_BIT(game.state, GAME_STARTED);
+  } else if (game.penalty_time != 0 && IS_SET(game.state, GAME_STARTED) &&
+             !IS_SET(game.state, GAME_ENDED) && !IS_SET(game.state, GAME_PAUSED) &&
+             !IS_SET(game.state, GAME_HALFTIME) && !IS_SET(game.state, GAME_READY)) {
     text_layer_set_text(text_state_layer, "Time Penalty");
     int i;
     for(i = 0; i < 6; i++){
@@ -130,28 +140,28 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
         break;
       }
     }
-  } else if ((game.state & GAME_HALFTIME) && (game.break_time > 5)) {
+  } else if (IS_SET(game.state, GAME_HALFTIME) && (game.break_time > 5)) {
       // Needed cause player can shorten the break
       game.break_time = 5;
   }
 }
 
 static void up_double_click(ClickRecognizerRef recognizer, void *context) {
-  if ((game.state & GAME_HALFTIME) && !(game.state & GAME_READY)) {
+  if (IS_SET(game.state, GAME_HALFTIME) && !IS_SET(game.state, GAME_READY)) {
     game.period++;
     game.play_time = game_templates[game.template].play_time[game.period - 1];
     game.time_to_go = game_templates[game.template].play_time[game.period - 1];
     game.break_time = game_templates[game.template].break_time[game.period - 1];
     game.added_time = 0;
     text_layer_set_text(text_state_layer, "Ready to Play");
-    game.state ^= GAME_HALFTIME;
-    game.state ^= GAME_STARTED;
-    game.state ^= GAME_READY;
+    REMOVE_BIT(game.state, GAME_HALFTIME);
+    REMOVE_BIT(game.state, GAME_STARTED); /* was toggle... ? */
+    SET_BIT(game.state, GAME_READY);
   }
 }
 
 static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!(game.state & GAME_STARTED)) {
+  if (!IS_SET(game.state, GAME_STARTED)) {
     // TODO: Let's change this around entirely and put us into "GAME_SET" mode now.
     //       If in GAME_SET mode, let's just exit
     game.template++;
@@ -160,7 +170,7 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
       game.template = 0;
     }
     setGameTemplate(game.template);
-  } else if (!(game.state & GAME_ENDED) && !(game.state & GAME_PAUSED)) {
+  } else if (!IS_SET(game.state, GAME_ENDED) && !IS_SET(game.state, GAME_PAUSED)) {
       text_layer_set_text(text_state_layer, "Player Change");
       // TODO: Reset away from this text...
       game.added_time = game.added_time + game.change_time;
@@ -171,11 +181,11 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   /* Game Logic */
-  if ((game.state & GAME_STARTED) && !(game.state & GAME_PAUSED)) {
+  if (IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_PAUSED)) {
     if (game.time_to_go > 0) {
       game.time_to_go--;
-    } else if (!(game.state & GAME_HALFTIME)) {
-      game.state |= GAME_HALFTIME;
+    } else if (!IS_SET(game.state, GAME_HALFTIME)) {
+      SET_BIT(game.state, GAME_HALFTIME);
       static const uint32_t const segments[] = { 500, 250, 500, 250, 500 };
       VibePattern pat = {
         .durations = segments,
@@ -186,20 +196,20 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     }
   }
   /* Halftime */
-  if ((game.state & GAME_HALFTIME) && !(game.state & GAME_READY)) {
+  if (IS_SET(game.state, GAME_HALFTIME) && !IS_SET(game.state, GAME_READY)) {
     if (game.break_time > 0) {
       game.break_time--;
     } else {
       game.period++;
       vibes_long_pulse();
       text_layer_set_text(text_state_layer, "Ready to Play");
-      game.state ^= GAME_HALFTIME;
-      game.state ^= GAME_STARTED;
-      game.state ^= GAME_READY;
+      REMOVE_BIT(game.state, GAME_HALFTIME);
+      REMOVE_BIT(game.state, GAME_STARTED);
+      SET_BIT(game.state, GAME_READY);
     }
   }
   
-  if (game.state & GAME_PAUSED) {
+  if (IS_SET(game.state, GAME_PAUSED)) {
     game.added_time++;
     game.pause_reminder++;
   }
@@ -207,7 +217,7 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     game.pause_reminder = 0;
     vibes_short_pulse();
   }
-  if ((game.state & GAME_STARTED) && !(game.state & GAME_HALFTIME)) {
+  if (IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_HALFTIME)) {
     game.play_time++;
     if (game.penalty_time > 0) {
       int i;
