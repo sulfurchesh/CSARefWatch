@@ -106,7 +106,7 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
     text_layer_set_text(text_state_layer, "Game Paused");
     SET_BIT(game.state, GAME_PAUSED);
     vibes_short_pulse();
-  } else if (IS_SET(game.state, GAME_PAUSED)) && !IS_SET(game.state, GAME_ENDED) &&
+  } else if (IS_SET(game.state, GAME_PAUSED) && !IS_SET(game.state, GAME_ENDED) &&
              IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_READY)) {
     text_layer_set_text(text_state_layer, "Game Running");
     game.pause_reminder = 0;
