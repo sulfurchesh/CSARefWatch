@@ -12,7 +12,7 @@ struct Game {
   unsigned int update_text;
   unsigned int penalty_time;
   unsigned int change_time;
-  unsigned int template;
+  int template;
   unsigned int penalty_times[6];
 }
 game = {0, 0, 2700, 0, 600, 1, 2, 0, 0, 0, 0, 0, {0,0,0,0,0,0}};
