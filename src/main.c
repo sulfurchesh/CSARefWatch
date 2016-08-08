@@ -255,7 +255,7 @@ void resetGame(void) {
   if (usePenalty()) {
     int i;
     for (i = 0; i < 6; i++) {
-      game.penalty_times[i] == 0;
+      game.penalty_times[i] = 0;
     }
   }
 }
