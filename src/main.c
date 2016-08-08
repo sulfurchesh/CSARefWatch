@@ -244,7 +244,7 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
 static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (isGameEnded()) {
     doNothing();
-  } else if (!isGameReady()) {
+  } else if (!isGameKickedOff() || isGameReady()) {
     text_layer_set_text(text_state_layer, "Game Running");
     vibes_long_pulse();
     startGame();
