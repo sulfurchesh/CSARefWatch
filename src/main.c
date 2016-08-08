@@ -142,6 +142,9 @@ void continueGame(void) {
   game.pause_reminder = 0;
 }
 
+/*
+ *   Now for several state checking tools to simplify the "question"
+ */
 // Have we kicked off?
 int isGameKickedOff(void) {
   if (game.state == GAME_UNSTARTED) {
@@ -319,9 +322,13 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     vibes_short_pulse();
   }
   
+  // Now deal with the play timer...
+  if (isGameKickedOff() && !isGameBreak()) {
+    game.play_time++;
+  }
+  
   // Now deal with penalty timers
   if (isGameRunning()) {
-    game.play_time++;
     if (game.penalty_time > 0) {
       int i;
       for(i = 0; i < 6; i++){
