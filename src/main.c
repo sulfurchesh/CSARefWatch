@@ -382,7 +382,7 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   }
   
   // Now deal with the play timer...
-  if (isGameKickedOff() && !isGameBreak()) {
+  if (isGameKickedOff() && !isGameBreak() && !isGameEnded()) {
     game.play_time++;
   }
   
