@@ -12,10 +12,12 @@ struct Game {
   unsigned int change_time;
   unsigned int template;
   unsigned int penalty_times[6];
-} game = {0, 0, 2700, 0, 600, 1, 0, 0, 0, 0, {0,0,0,0,0,0}};
+}
+game = {0, 0, 2700, 0, 600, 1, 0, 0, 0, 0, {0,0,0,0,0,0}};
 
 typedef struct {
   char name[15];
+  unsigned int nr_periods;
   unsigned int play_time[10];
   unsigned int break_time[10];
   unsigned int penalty_time;
@@ -24,29 +26,32 @@ typedef struct {
 } GameTemplate;
 
 const GameTemplate game_templates[] = {
-  {"Test 2/1 o",{120,120},{30,0},0,10,0},                  /* 11: TEST. 2x4, HT: 1m */
-  {"2x45/5    ",{2700,2700},{300,0},0,0,0},                /*  0: 2x45, HT: 5m */
-  {"L1O 45/15 ",{2700,2700},{900,0},0,30,0},               /*  1: L1O - 2x45, HT: 15m */
-  {"2x45+10/5 ",{2700,2700,600,600},{300,300,0,0},0,0,0},  /*  2: 2x45, 2x10 ET, HT: 5m */
-  {"OPDL 13/14",{1500,1500,1500},{480,480,0},0,30,0},      /*  3: OPDL U13/14 - 3x25, HT: 8m */
-  {"OPDL 15+  ",{2400,2400},{600,0},0,30,0},               /*  4: OPDL U15/16 - 2x40, HT: 10m */
-  {"2x25/5    ",{1500,1500},{300,0},0,0,0},                /*  5: 2x25, HT: 5m */
-  {"2x30/5    ",{1800,1800},{300,0},0,0,0},                /*  6: 2x30, HT: 5m */
-  {"2x35/5    ",{2100,2100},{300,0},0,0,0},                /*  7: 2x35, HT: 5m */
-  {"2x40/5    ",{2400,2400},{300,0},0,0,0},                /*  8: 2x40, HT: 5m */
-  {"4x12/252  ",{720,720,720,720},{120,300,120,0},0,0,0},  /*  9: 4x12, HT: 2m, 5m, 2m */
-  {"4x15/252  ",{900,900,900,900},{120,300,120,0},0,0,0},  /* 10: 4x15, HT: 2m, 5m, 2m */
-  {"Test 4/1 p",{240,240},{60,0},20,10,0}                  /* 12: TEST. 2x4, HT: 1m, penalties HIDDEN */
+  {"Test 2/1 o",2,{120,120},{30,0},0,10,0},                  /* 11: TEST. 2x4, HT: 1m */
+  {"2x45/5    ",2,{2700,2700},{300,0},0,0,0},                /*  0: 2x45, HT: 5m */
+  {"L1O 45/15 ",2,{2700,2700},{900,0},0,30,0},               /*  1: L1O - 2x45, HT: 15m */
+  {"2x45+10/5 ",4,{2700,2700,600,600},{300,300,0,0},0,0,0},  /*  2: 2x45, 2x10 ET, HT: 5m */
+  {"OPDL 13/14",3,{1500,1500,1500},{480,480,0},0,30,0},      /*  3: OPDL U13/14 - 3x25, HT: 8m */
+  {"OPDL 15+  ",2,{2400,2400},{600,0},0,30,0},               /*  4: OPDL U15/16 - 2x40, HT: 10m */
+  {"2x25/5    ",2,{1500,1500},{300,0},0,0,0},                /*  5: 2x25, HT: 5m */
+  {"2x30/5    ",2,{1800,1800},{300,0},0,0,0},                /*  6: 2x30, HT: 5m */
+  {"2x35/5    ",2,{2100,2100},{300,0},0,0,0},                /*  7: 2x35, HT: 5m */
+  {"2x40/5    ",2,{2400,2400},{300,0},0,0,0},                /*  8: 2x40, HT: 5m */
+  {"4x12/252  ",4,{720,720,720,720},{120,300,120,0},0,0,0},  /*  9: 4x12, HT: 2m, 5m, 2m */
+  {"4x15/252  ",4,{900,900,900,900},{120,300,120,0},0,0,0},  /* 10: 4x15, HT: 2m, 5m, 2m */
+  {"Test 4/1 p",2,{240,240},{60,0},20,10,0}                  /* 12: TEST. 2x4, HT: 1m, penalties HIDDEN */
 };
 /* Define the number of templates above, not including the Test template */
 #define NrTemplates 2
 
+#define TRUE     1
+#define FALSE    0
+
 #define GAME_UNSTARTED 0
-#define GAME_STARTED  (1 << 0) // Game was started or resterted
+#define GAME_STARTED  (1 << 0) // Game was started or restarted
 #define GAME_PAUSED   (1 << 1) // Game is paused
-#define GAME_HALFTIME (1 << 2) // Halftime, might renamed to brake
-#define GAME_ENDED    (1 << 3) // End of the game
-#define GAME_READY    (1 << 4) // Ready to restart
+#define GAME_HALFTIME (1 << 2) // Halftime, or any other "break"
+#define GAME_READY    (1 << 3) // Ready to restart from a "break"
+#define GAME_ENDED    (1 << 4) // End of the game
 
 #define SET_LENGTH     1
 #define PERIODS        2
@@ -74,45 +79,165 @@ static char added_time_buffer[20];
 static char break_time_buffer[20];
 static char penalty_buffer[80];
 
+// We have kickoff! (the start of any period of play)
+void startGame(void) {
+  SET_BIT(game.state, GAME_STARTED);
+  REMOVE_BIT(game.state, GAME_PAUSED);
+  REMOVE_BIT(game.state, GAME_HALFTIME);
+  REMOVE_BIT(game.state, GAME_READY);
+}
+
+// Mark our game as complete/over/done-like-dinner
+void endGame(void) {
+  REMOVE_BIT(game.state, GAME_HALFTIME);
+  SET_BIT(game.state, GAME_ENDED);
+  text_layer_set_text(text_state_layer, "Game complete");  
+}
+
+// We have halftime (or any break from play)
+void startBreak(void) {
+  SET_BIT(game.state, GAME_HALFTIME);
+  REMOVE_BIT(game.state, GAME_STARTED);
+  REMOVE_BIT(game.state, GAME_PAUSED);
+  REMOVE_BIT(game.state, GAME_READY);
+  static const uint32_t const segments[] = { 500, 250, 500, 250, 500 };
+  VibePattern pat = {
+    .durations = segments,
+    .num_segments = ARRAY_LENGTH(segments),
+  };
+  vibes_enqueue_custom_pattern(pat);
+  // Have we passed/met the number of periods in the game? If so... we're done
+  if (game.period >= game.nr_periods) {
+    endGame();
+  } else {
+    text_layer_set_text(text_state_layer, "Halftime");
+  }
+}
+
+// Halftime (or our break) has ended... ready to kickoff!
+// We start by incrementing the game.period by one and resetting the times...
+void endBreak(void) {
+  game.period++;
+  game.play_time = game_templates[game.template].play_time[game.period - 1];
+  game.time_to_go = game_templates[game.template].play_time[game.period - 1];
+  game.break_time = game_templates[game.template].break_time[game.period - 1];
+  game.added_time = 0;
+  text_layer_set_text(text_state_layer, "Ready to Play");
+  REMOVE_BIT(game.state, GAME_HALFTIME);
+  REMOVE_BIT(game.state, GAME_STARTED);
+  REMOVE_BIT(game.state, GAME_PAUSED);
+  SET_BIT(game.state, GAME_READY);
+}
+
+// PAUSE the game
+void pauseGame(void) {
+  SET_BIT(game.state, GAME_PAUSED);
+}
+
+// UnPAUSE the game
+void continueGame(void) {
+  REMOVE_BIT(game.state, GAME_PAUSED);
+  game.pause_reminder = 0;
+}
+
+// Have we kicked off?
+int isGameKickedOff(void) {
+  if (game.state == GAME_UNSTARTED) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+// Has the game ended?
+int isGameEnded(void) {
+  if (IS_SET(game.state, GAME_ENDED)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+// Are we in a break or ready for kickoff?
+int isGameBreak(void) {
+  if (IS_SET(game.state, GAME_HALFTIME) || IS_SET(game.state, GAME_READY)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+// Are we ready for a kickoff?
+int isGameReady(void) {
+  if (!isGameKickedOff() || IS_SET(game.state, READY)) {
+    return TRUE;
+  }
+  return FALSE;  
+}
+
+// Have we paused the game?
+int isGamePaused(void) {
+  if (IS_SET(game.state, GAME_PAUSED)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+// Is the game clock actively running?
+int isGameRunning(void) {
+  if (!isGameKickedOff() || isGameEnded() || isGameBreak() || isGamePaused()) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+// Literally something that just... returns.
+void doNothing(void) {
+  return;
+}
+
 void setGameTemplate(int template_no) {
-  if (game.state == 0){
+  if (!isGameKickedOff()) {
     text_layer_set_text(text_state_layer, game_templates[template_no].name);
     game.time_to_go = game_templates[template_no].play_time[game.period - 1];
     game.break_time = game_templates[template_no].break_time[game.period - 1];
     game.penalty_time = game_templates[template_no].penalty_time;
-    if (game.penalty_time == 0){
+    if (game.penalty_time == 0) {
       text_layer_set_text(text_penalty_time_layer, "");
     }
     game.change_time = game_templates[template_no].change_time;
   }
 }
 
+void gameSetMode(void) {
+  // TODO: Let's change this around entirely and put us into "GAME_SET" mode now.
+  //       If in GAME_SET mode, let's just exit
+  game.template++;
+  // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
+  if (game.template > NrTemplates) {
+    game.template = 0;
+  }
+  setGameTemplate(game.template);
+}
+
 static void down_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!(IS_SET(game.state, GAME_STARTED))) {
-    game.template++;
-    // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
-    if (game.template > NrTemplates) {
-      game.template = 0;
-    }
-    setGameTemplate(game.template);
+  if (!isGameKickedOff()) {
+    gameSetMode();
   } else {
     text_layer_set_text(text_state_layer, "Game...");
   }
 }
 
 static void up_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!IS_SET(game.state, GAME_PAUSED) && !IS_SET(game.state, GAME_ENDED) &&
-       IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_READY)) {
+  if (isGameEnded()) {
+    do_nothing();
+  } else if (isGameRunning()) {
     text_layer_set_text(text_state_layer, "Game Paused");
-    SET_BIT(game.state, GAME_PAUSED);
     vibes_short_pulse();
-  } else if (IS_SET(game.state, GAME_PAUSED) && !IS_SET(game.state, GAME_ENDED) &&
-             IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_READY)) {
+    pauseGame();
+  } else if (isGamePaused()) {
     text_layer_set_text(text_state_layer, "Game Running");
-    game.pause_reminder = 0;
-    REMOVE_BIT(game.state, GAME_PAUSED);
     vibes_short_pulse();
-  } else if (!IS_SET(game.state, GAME_PAUSED) && !IS_SET(game.state, GAME_ENDED) &&
+    continueGame();
+  // Need to check this next bit out...
+  } else if (!IS_SET(game.state, GAME_PAUSED) &&
              !IS_SET(game.state, GAME_STARTED) && IS_SET(game.state, GAME_READY)) {
     REMOVE_BIT(game.state, GAME_READY);
     game.play_time = game_templates[game.template].play_time[game.period - 1];
@@ -123,15 +248,14 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
 }
 
 static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if ((!IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_ENDED) &&
-      !IS_SET(game.state, GAME_HALFTIME)) || IS_SET(game.state, GAME_READY)) {
+  if (isGameEnded()) {
+    do_nothing();
+  if (!isGameReady()) {
     text_layer_set_text(text_state_layer, "Game Running");
     vibes_long_pulse();
-    SET_BIT(game.state, GAME_STARTED);
-    REMOVE_BIT(game.state, GAME_READY);
+    startGame();
   } else if (game.penalty_time != 0 && IS_SET(game.state, GAME_STARTED) &&
-             !IS_SET(game.state, GAME_ENDED) && !IS_SET(game.state, GAME_PAUSED) &&
-             !IS_SET(game.state, GAME_HALFTIME) && !IS_SET(game.state, GAME_READY)) {
+             !isGamePaused()) && !isGameBreak())) {
     text_layer_set_text(text_state_layer, "Time Penalty");
     int i;
     for(i = 0; i < 6; i++){
@@ -149,29 +273,16 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
 
 static void up_double_click(ClickRecognizerRef recognizer, void *context) {
   if (IS_SET(game.state, GAME_HALFTIME) && !IS_SET(game.state, GAME_READY)) {
-    game.period++;
-    game.play_time = game_templates[game.template].play_time[game.period - 1];
-    game.time_to_go = game_templates[game.template].play_time[game.period - 1];
-    game.break_time = game_templates[game.template].break_time[game.period - 1];
-    game.added_time = 0;
-    text_layer_set_text(text_state_layer, "Ready to Play");
-    REMOVE_BIT(game.state, GAME_HALFTIME);
-    REMOVE_BIT(game.state, GAME_STARTED); /* was toggle... ? */
-    SET_BIT(game.state, GAME_READY);
+    endHalftime();
   }
 }
 
 static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!IS_SET(game.state, GAME_STARTED)) {
-    // TODO: Let's change this around entirely and put us into "GAME_SET" mode now.
-    //       If in GAME_SET mode, let's just exit
-    game.template++;
-    // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
-    if (game.template > NrTemplates) {
-      game.template = 0;
-    }
-    setGameTemplate(game.template);
-  } else if (!IS_SET(game.state, GAME_ENDED) && !IS_SET(game.state, GAME_PAUSED)) {
+  if (isGameEnded()) {
+    do_nothing();
+  } else if (if (!isGameKickedOff()) {
+    gameSetMode();
+  } else if (!isGameBreak() && !isGamePaused()) {
       text_layer_set_text(text_state_layer, "Player Change");
       // TODO: Reset away from this text...
       game.added_time = game.added_time + game.change_time;
@@ -182,35 +293,30 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   /* Game Logic */
-  if (IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_PAUSED)) {
+  if (isGameEnded()) {
+    // If we're done the game, let's just completely skip/void this entire section
+    return;
+  }
+  if (isGameRunning()) {
     if (game.time_to_go > 0) {
       game.time_to_go--;
     } else if (!IS_SET(game.state, GAME_HALFTIME)) {
-      SET_BIT(game.state, GAME_HALFTIME);
-      static const uint32_t const segments[] = { 500, 250, 500, 250, 500 };
-      VibePattern pat = {
-        .durations = segments,
-        .num_segments = ARRAY_LENGTH(segments),
-      };
-      vibes_enqueue_custom_pattern(pat);
-      text_layer_set_text(text_state_layer, "Halftime");
+      // This will end the game if that's where we happen to be too...
+      startBreak();
     }
   }
-  /* Halftime */
+  /* Halftime... */
   if (IS_SET(game.state, GAME_HALFTIME) && !IS_SET(game.state, GAME_READY)) {
     if (game.break_time > 0) {
       game.break_time--;
     } else {
-      game.period++;
       vibes_long_pulse();
-      text_layer_set_text(text_state_layer, "Ready to Play");
-      REMOVE_BIT(game.state, GAME_HALFTIME);
-      REMOVE_BIT(game.state, GAME_STARTED);
-      SET_BIT(game.state, GAME_READY);
+      endBreak();
     }
   }
   
-  if (IS_SET(game.state, GAME_PAUSED)) {
+  // Let's deal with a paused game and do some notifying every 10s
+  if (isGamePaused()) {
     game.added_time++;
     game.pause_reminder++;
   }
@@ -218,7 +324,9 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     game.pause_reminder = 0;
     vibes_short_pulse();
   }
-  if (IS_SET(game.state, GAME_STARTED) && !IS_SET(game.state, GAME_HALFTIME)) {
+  
+  // Now deal with penalty timers
+  if (isGameRunning()) {
     game.play_time++;
     if (game.penalty_time > 0) {
       int i;
@@ -249,6 +357,7 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   snprintf(break_time_buffer, sizeof(break_time_buffer), "P %.2d:%.2d", game.break_time / 60, game.break_time % 60 );
   text_layer_set_text(text_break_time_layer, break_time_buffer);
   
+  // Update penalty text buffers if enabled
   if (game.penalty_time > 0) {
     typedef char string[10];
     static string temp_penalty_buffer[6];
