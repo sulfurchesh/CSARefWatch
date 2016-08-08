@@ -229,7 +229,7 @@ static void down_single_click_handler(ClickRecognizerRef recognizer, void *conte
 
 static void up_single_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (isGameEnded()) {
-    do_nothing();
+    doNothing();
   } else if (isGameRunning()) {
     text_layer_set_text(text_state_layer, "Game Paused");
     vibes_short_pulse();
@@ -238,21 +238,13 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
     text_layer_set_text(text_state_layer, "Game Running");
     vibes_short_pulse();
     continueGame();
-  // Need to check this next bit out...
-  } else if (!IS_SET(game.state, GAME_PAUSED) &&
-             !IS_SET(game.state, GAME_STARTED) && IS_SET(game.state, GAME_READY)) {
-    REMOVE_BIT(game.state, GAME_READY);
-    game.play_time = game_templates[game.template].play_time[game.period - 1];
-    game.time_to_go = game_templates[game.template].play_time[game.period - 1];
-    game.break_time = game_templates[game.template].break_time[game.period - 1];
-    game.added_time = 0;
   }
 }
 
 static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (isGameEnded()) {
-    do_nothing();
-  if (!isGameReady()) {
+    doNothing();
+  } else if (!isGameReady()) {
     text_layer_set_text(text_state_layer, "Game Running");
     vibes_long_pulse();
     startGame();
@@ -281,7 +273,7 @@ static void up_double_click(ClickRecognizerRef recognizer, void *context) {
 
 static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (isGameEnded()) {
-    do_nothing();
+    doNothing();
   } else if (if (!isGameKickedOff()) {
     gameSetMode();
   } else if (!isGameBreak() && !isGamePaused()) {
