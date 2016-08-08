@@ -82,12 +82,19 @@ static char added_time_buffer[20];
 static char break_time_buffer[20];
 static char penalty_buffer[80];
 
+// Just show "Game Running". All in one place in case we change text
+void showRunningText(void) {
+  text_layer_set_text(text_state_layer, "Game Running");
+}
+
 // We have kickoff! (the start of any period of play)
 void startGame(void) {
   SET_BIT(game.state, GAME_STARTED);
   REMOVE_BIT(game.state, GAME_PAUSED);
   REMOVE_BIT(game.state, GAME_HALFTIME);
   REMOVE_BIT(game.state, GAME_READY);
+  showRunningText();
+  vibes_long_pulse();
 }
 
 // Mark our game as complete/over/done-like-dinner
@@ -201,6 +208,14 @@ int isGameRunning(void) {
   return TRUE;
 }
 
+// Does this game have penalty counters?
+int usePenalty(void) {
+  if (game.penalty_time != 0) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
 // Literally something that just... returns.
 void doNothing(void) {
   return;
@@ -212,7 +227,7 @@ void setGameTemplate(int template_no) {
     game.time_to_go = game_templates[template_no].play_time[game.period - 1];
     game.break_time = game_templates[template_no].break_time[game.period - 1];
     game.penalty_time = game_templates[template_no].penalty_time;
-    if (game.penalty_time == 0) {
+    if (!usePenalty()) {
       text_layer_set_text(text_penalty_time_layer, "");
     }
     game.change_time = game_templates[template_no].change_time;
@@ -231,11 +246,12 @@ void gameSetMode(void) {
   setGameTemplate(game.template);
 }
 
+/*
+ *   Now for the button pressing handlers
+ */
 static void down_single_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (!isGameKickedOff()) {
     gameSetMode();
-  } else {
-    text_layer_set_text(text_state_layer, "Game...");
   }
 }
 
@@ -247,7 +263,7 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
     vibes_short_pulse();
     pauseGame();
   } else if (isGamePaused()) {
-    text_layer_set_text(text_state_layer, "Game Running");
+    showRunningText();
     vibes_short_pulse();
     continueGame();
   }
@@ -257,10 +273,8 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
   if (isGameEnded()) {
     doNothing();
   } else if (!isGameKickedOff() || isGameReady()) {
-    text_layer_set_text(text_state_layer, "Game Running");
-    vibes_long_pulse();
     startGame();
-  } else if (game.penalty_time != 0 && isGameRunning()) {
+  } else if (usePenalty() && isGameRunning()) {
     text_layer_set_text(text_state_layer, "Time Penalty");
     int i;
     for(i = 0; i < 6; i++){
@@ -271,9 +285,11 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
       }
       game.update_text++;
     }
-  } else if (IS_SET(game.state, GAME_HALFTIME) && (game.break_time > 5)) {
-      // Needed cause player can shorten the break
-      game.break_time = 5;
+  } else if (IS_SET(game.state, GAME_HALFTIME) && (game.break_time > 0)) {
+    // When marked as HALFTIME, we need because the teans can shorten the break so
+    // we're going to end the break and then hit off on the restart all in one fell swoop
+    endBreak();
+    startGame();
   }
 }
 
@@ -297,6 +313,9 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
   }
 }
 
+/*
+ *   And then we handle the "tick" (ie... seconds)
+ */
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   /* Game Logic */
   if (isGameEnded()) {
@@ -337,7 +356,7 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   if (game.update_text >= 10) {
     resetUpdate();
     if (isGameRunning()) {
-      text_layer_set_text(text_state_layer, "Game Running");
+      showRunningText();
     } else {
       text_layer_set_text(text_state_layer, "Unknown state!");
     }
@@ -350,7 +369,7 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   
   // Now deal with penalty timers
   if (isGameRunning()) {
-    if (game.penalty_time > 0) {
+    if (usePenalty()) {
       int i;
       for(i = 0; i < 6; i++){
         if (game.penalty_times[i] > 0) {
@@ -380,7 +399,7 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   text_layer_set_text(text_break_time_layer, break_time_buffer);
   
   // Update penalty text buffers if enabled
-  if (game.penalty_time > 0) {
+  if (usePenalty()) {
     typedef char string[10];
     static string temp_penalty_buffer[6];
     int i;
@@ -416,8 +435,8 @@ void handle_init(void) {
   text_penalty_time_layer = text_layer_create(GRect(0, 110, 144, 168));
   
   text_layer_set_text_alignment(text_game_time_layer, GTextAlignmentCenter);
-  /*text_layer_set_text_alignment(text_break_time_layer, GTextAlignmentRight);
-  text_layer_set_text_alignment(text_added_time_layer, GTextAlignmentRight);*/
+  // text_layer_set_text_alignment(text_break_time_layer, GTextAlignmentRight);
+  // text_layer_set_text_alignment(text_added_time_layer, GTextAlignmentRight);
   
   /* Font Setup */
   text_layer_set_font(text_game_time_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_UNIVERSELSE_40)));
