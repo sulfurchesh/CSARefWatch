@@ -167,7 +167,7 @@ int isGameBreak(void) {
 
 // Are we ready for a kickoff?
 int isGameReady(void) {
-  if (!isGameKickedOff() || IS_SET(game.state, READY)) {
+  if (!isGameKickedOff() || IS_SET(game.state, GAME_READY)) {
     return TRUE;
   }
   return FALSE;  
@@ -248,8 +248,7 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
     text_layer_set_text(text_state_layer, "Game Running");
     vibes_long_pulse();
     startGame();
-  } else if (game.penalty_time != 0 && IS_SET(game.state, GAME_STARTED) &&
-             !isGamePaused()) && !isGameBreak())) {
+  } else if (game.penalty_time != 0 && isGameRunning()) {
     text_layer_set_text(text_state_layer, "Time Penalty");
     int i;
     for(i = 0; i < 6; i++){
@@ -267,14 +266,14 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
 
 static void up_double_click(ClickRecognizerRef recognizer, void *context) {
   if (IS_SET(game.state, GAME_HALFTIME) && !IS_SET(game.state, GAME_READY)) {
-    endHalftime();
+    endBreak();
   }
 }
 
 static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (isGameEnded()) {
     doNothing();
-  } else if (if (!isGameKickedOff()) {
+  } else if (!isGameKickedOff()) {
     gameSetMode();
   } else if (!isGameBreak() && !isGamePaused()) {
       text_layer_set_text(text_state_layer, "Player Change");
