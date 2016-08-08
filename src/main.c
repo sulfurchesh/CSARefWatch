@@ -248,7 +248,16 @@ void gameSetMode(void) {
 
 void resetGame(void) {
   game.state = GAME_UNSTARTED;
+  game.play_time = 0;
+  game.period = 1;
   setGameTemplate(game.template);
+  // Reset the penalties
+  if (usePenalty()) {
+    int i;
+    for (i = 0; i < 6; i++) {
+      game.penalty_times[i] == 0;
+    }
+  }
 }
 /*
  *   Now for the button pressing handlers
