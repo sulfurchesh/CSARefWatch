@@ -7,13 +7,14 @@ struct Game {
   unsigned int added_time;
   unsigned int break_time;
   unsigned int period;
+  unsigned int nr_periods;
   unsigned int pause_reminder;
   unsigned int penalty_time;
   unsigned int change_time;
   unsigned int template;
   unsigned int penalty_times[6];
 }
-game = {0, 0, 2700, 0, 600, 1, 0, 0, 0, 0, {0,0,0,0,0,0}};
+game = {0, 0, 2700, 0, 600, 1, 2, 0, 0, 0, 0, {0,0,0,0,0,0}};
 
 typedef struct {
   char name[15];
@@ -203,6 +204,7 @@ void setGameTemplate(int template_no) {
       text_layer_set_text(text_penalty_time_layer, "");
     }
     game.change_time = game_templates[template_no].change_time;
+    game.nr_periods = game_templates[template_no].nr_periods;
   }
 }
 
