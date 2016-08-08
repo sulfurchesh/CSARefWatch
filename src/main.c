@@ -9,12 +9,13 @@ struct Game {
   unsigned int period;
   unsigned int nr_periods;
   unsigned int pause_reminder;
+  unsigned int update_text;
   unsigned int penalty_time;
   unsigned int change_time;
   unsigned int template;
   unsigned int penalty_times[6];
 }
-game = {0, 0, 2700, 0, 600, 1, 2, 0, 0, 0, 0, {0,0,0,0,0,0}};
+game = {0, 0, 2700, 0, 600, 1, 2, 0, 0, 0, 0, 0, {0,0,0,0,0,0}};
 
 typedef struct {
   char name[15];
@@ -96,12 +97,18 @@ void endGame(void) {
   text_layer_set_text(text_state_layer, "Game complete");  
 }
 
+// Simply set this back to 0
+void resetUpdate(void) {
+  game.update_text = 0;
+}
+
 // We have halftime (or any break from play)
 void startBreak(void) {
   SET_BIT(game.state, GAME_HALFTIME);
   REMOVE_BIT(game.state, GAME_STARTED);
   REMOVE_BIT(game.state, GAME_PAUSED);
   REMOVE_BIT(game.state, GAME_READY);
+  resetUpdate();
   static const uint32_t const segments[] = { 500, 250, 500, 250, 500 };
   VibePattern pat = {
     .durations = segments,
@@ -134,6 +141,7 @@ void endBreak(void) {
 // PAUSE the game
 void pauseGame(void) {
   SET_BIT(game.state, GAME_PAUSED);
+  resetUpdate();
 }
 
 // UnPAUSE the game
@@ -261,6 +269,7 @@ static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) 
         vibes_short_pulse();
         break;
       }
+      game.update_text++;
     }
   } else if (IS_SET(game.state, GAME_HALFTIME) && (game.break_time > 5)) {
       // Needed cause player can shorten the break
@@ -281,10 +290,10 @@ static void select_long_click_handler(ClickRecognizerRef recognizer, void *conte
     gameSetMode();
   } else if (!isGameBreak() && !isGamePaused()) {
       text_layer_set_text(text_state_layer, "Player Change");
-      // TODO: Reset away from this text...
       game.added_time = game.added_time + game.change_time;
       // We add the time to the "to_go", because the countdown ISN'T stopped...
       game.time_to_go = game.time_to_go + game.change_time;
+      game.update_text++;
   }
 }
 
@@ -297,6 +306,10 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   if (isGameRunning()) {
     if (game.time_to_go > 0) {
       game.time_to_go--;
+      // We only update this if it's non-zero
+      if (game.update_text) {
+        game.update_text++;
+      }
     } else if (!IS_SET(game.state, GAME_HALFTIME)) {
       // This will end the game if that's where we happen to be too...
       startBreak();
@@ -320,6 +333,14 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   if (game.pause_reminder >= 10) {
     game.pause_reminder = 0;
     vibes_short_pulse();
+  }
+  if (game.update_text >= 10) {
+    resetUpdate();
+    if (isGameRunning()) {
+      text_layer_set_text(text_state_layer, "Game Running");
+    } else {
+      text_layer_set_text(text_state_layer, "Unknown state!");
+    }
   }
   
   // Now deal with the play timer...
