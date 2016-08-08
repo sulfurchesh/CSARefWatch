@@ -9,7 +9,7 @@
     "resources": {
         "media": [
             {
-                "file": "images/Refwatch_icon.png",
+                "file": "images/Icon.png",
                 "menuIcon": true,
                 "name": "APP_ICON",
                 "type": "png"
