@@ -132,14 +132,14 @@ void enableSetMode(void) {
 }
 
 void set_user_play_time(int amount) {
-  int i;
+  unsigned int i;
   for (i = 0; i < user_set.nr_periods; i++) {
     user_set.play_time[i] = amount;
   }
 }
 
 void set_user_break_time(int amount) {
-  int i;
+  unsigned int i;
   for (i = 0; i < user_set.nr_periods; i++) {
     user_set.break_time[i] = amount;
   }
@@ -157,7 +157,7 @@ void setIncrement(void) {
       set_user_play_time(user_set.play_time[0] + 60);
       break;
     case SET_HT_LENGTH:
-      user_set.break_time += 60;
+        set_user_break_time(user_set.break_time[0] + 60);
       break;
     case SET_CHG_TIME:
       user_set.change_time++;
