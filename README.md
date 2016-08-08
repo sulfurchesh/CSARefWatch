@@ -10,7 +10,13 @@ This watch is preset with times/settings for CSA based games, primarily those in
 Before the game:
 * DOWN single click - cycle through game templates
 * UP long click - start the game
-* SELECT long click - cycle through game templates [TODO: Put into "set" mode]
+* SELECT long click - put into "set" mode [SET mode]
+
+In SET mode:
+* SELECT single click - move to next item
+* UP single click - increment item by 1 minute (60s) [if time] or 1
+* DOWN single click - decrement item by 1 minute (60s) [if time] or 1
+* SELECT long click - back to "game" mode [Before the game]
 
 During the game:
 * UP single click - pause/unpause the game
