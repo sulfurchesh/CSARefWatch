@@ -28,21 +28,25 @@ typedef struct {
 } GameTemplate;
 
 const GameTemplate game_templates[] = {
-  {"Test!!!   ",2,{30,30},{45,0},0,10,0},                    /* 11: TEST. 2x.5, HT: .75m */
-  {"2x45/5    ",2,{2700,2700},{300,0},0,0,0},                /*  0: 2x45, HT: 5m */
-  {"L1O 45/15 ",2,{2700,2700},{900,0},0,30,0},               /*  1: L1O - 2x45, HT: 15m */
+  {"Test!!!   ",2,{30,30},{45,45},0,10,0},                    /* 11: TEST. 2x.5, HT: .75m */
+  {"2x45/5    ",2,{2700,2700},{300,300},0,0,0},                /*  0: 2x45, HT: 5m */
+  {"L1O 45/15 ",2,{2700,2700},{900,900},0,30,0},               /*  1: L1O - 2x45, HT: 15m */
   {"2x45+10/5 ",4,{2700,2700,600,600},{300,300,0,0},0,0,0},  /*  2: 2x45, 2x10 ET, HT: 5m */
-  {"OPDL 13/14",3,{1500,1500,1500},{480,480,0},0,30,0},      /*  3: OPDL U13/14 - 3x25, HT: 8m */
-  {"OPDL 15+  ",2,{2400,2400},{600,0},0,30,0},               /*  4: OPDL U15/16 - 2x40, HT: 10m */
-  {"2x25/5    ",2,{1500,1500},{300,0},0,0,0},                /*  5: 2x25, HT: 5m */
-  {"2x30/5    ",2,{1800,1800},{300,0},0,0,0},                /*  6: 2x30, HT: 5m */
-  {"2x35/5    ",2,{2100,2100},{300,0},0,0,0},                /*  7: 2x35, HT: 5m */
-  {"2x40/5    ",2,{2400,2400},{300,0},0,0,0},                /*  8: 2x40, HT: 5m */
+  {"OPDL 13/14",3,{1500,1500,1500},{480,480,480},0,30,0},      /*  3: OPDL U13/14 - 3x25, HT: 8m */
+  {"OPDL 15+  ",2,{2400,2400},{600,600},0,30,0},               /*  4: OPDL U15/16 - 2x40, HT: 10m */
+  {"2x25/5    ",2,{1500,1500},{300,300},0,0,0},                /*  5: 2x25, HT: 5m */
+  {"2x30/5    ",2,{1800,1800},{300,300},0,0,0},                /*  6: 2x30, HT: 5m */
+  {"2x35/5    ",2,{2100,2100},{300,300},0,0,0},                /*  7: 2x35, HT: 5m */
+  {"2x40/5    ",2,{2400,2400},{300,300},0,0,0},                /*  8: 2x40, HT: 5m */
   {"4x12/252  ",4,{720,720,720,720},{120,300,120,0},0,0,0},  /*  9: 4x12, HT: 2m, 5m, 2m */
   {"4x15/252  ",4,{900,900,900,900},{120,300,120,0},0,0,0},  /* 10: 4x15, HT: 2m, 5m, 2m */
-  {"Test 2/1 o",2,{120,120},{30,0},0,10,0},                  /* 11: TEST. 2x4, HT: 1m */
-  {"Test 4/1 p",2,{240,240},{60,0},20,10,0}                  /* 12: TEST. 2x4, HT: 1m, penalties HIDDEN */
+  {"Test 2/1 o",2,{120,120},{30,30},0,10,0},                  /* 11: TEST. 2x4, HT: 1m */
+  {"Test 4/1 p",2,{240,240},{60,60},20,10,0}                  /* 12: TEST. 2x4, HT: 1m, penalties HIDDEN */
 };
+
+// Structure for SET mode. Allow the user to change nr_periods, play_time, break_time, change_time
+struct GameTemplate user_set = {"User Set  ",2,{2700,2700,0,0,0,0},{300,300,0,0,0,0},0,15,0};
+
 /* Define the number of templates above, not including the Test template */
 #define NrTemplates 2
 
@@ -56,15 +60,24 @@ const GameTemplate game_templates[] = {
 #define GAME_READY    (1 << 3) // Ready to restart from a "break"
 #define GAME_ENDED    (1 << 4) // End of the game
 
-#define SET_LENGTH     1
-#define PERIODS        2
-#define HT_LENGTH      3
-#define ET_LENGTH      4
+#define MODE_GAME       0
+#define MODE_SET        1
 
-#define IS_SET(flag,bit)  ((flag) & (bit))
-#define SET_BIT(var,bit)  ((var) |= (bit))
+#define USE_USERSET     -1
+
+#define SET_PERIODS     1
+#define SET_PER_LENGTH  2
+#define SET_HT_LENGTH   3
+#define SET_CHG_TIME    4
+#define MIN_SET_MODE    1
+#define MAX_SET_MODE    SET_CHG_TIME
+
+#define MAX_USER_PERIODS  6
+
+#define IS_SET(flag,bit)     ((flag) & (bit))
+#define SET_BIT(var,bit)     ((var) |= (bit))
 #define REMOVE_BIT(var,bit)  ((var) &= ~(bit))
-#define TOGGLE_BIT(var,bit) ((var) = (var) ^ (bit))
+#define TOGGLE_BIT(var,bit)  ((var) = (var) ^ (bit))
 
 /* Global Vars*/  
 Window *my_window;
@@ -81,12 +94,122 @@ static char time_to_go_buffer[20];
 static char added_time_buffer[20];
 static char break_time_buffer[20];
 static char penalty_buffer[80];
+static int app_mode;
+static int set_mode_item;
 
 // Just show "Game Running". All in one place in case we change text
 void showRunningText(void) {
   text_layer_set_text(text_state_layer, "Game Running");
 }
 
+/*
+ *    Stuff for SET mode
+ */
+int isUserSet(void) {
+  if (game.template == USE_USERSET) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+int inSetMode(void) {
+  if (app_mode == MODE_SET) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+// First steps towards setting the mode...
+void enableSetMode(void) {
+  if (inSetMode()) {
+    app_mode = MODE_GAME;
+    text_layer_set_text(text_state_layer, "Ready...");
+  } else {
+    app_mode      = MODE_SET;
+    game.template = USE_USERSET;
+    text_layer_set_text(text_state_layer, "SET mode...");
+  }
+}
+
+void set_user_play_time(int amount) {
+  int i;
+  for (i = 0; i < user_set.nr_periods; i++) {
+    user_set.play_time[i] = amount;
+  }
+}
+
+void set_user_break_time(int amount) {
+  int i;
+  for (i = 0; i < user_set.nr_periods; i++) {
+    user_set.break_time[i] = amount;
+  }
+}
+
+// Increment the item by 1 (if object), 60s (if time)
+void setIncrement(void) {
+  switch (set_mode_item) {
+    case SET_PERIODS:
+      if (user_set.nr_periods < MAX_USER_PERIODS) {
+        user_set.nr_periods++;
+      }
+      break;
+    case SET_PER_LENGTH:
+      set_user_play_time(user_set.play_time[0] + 60);
+      break;
+    case SET_HT_LENGTH:
+      user_set.break_time += 60;
+      break;
+    case SET_CHG_TIME:
+      user_set.change_time++;
+      break;
+    default:
+      return;
+  }
+}
+
+// Decrement the item by 1 (if object), 60s (if time)
+void setDecrement(void) {
+  switch (set_mode_item) {
+    case SET_PERIODS:
+      if (user_set.nr_periods > 0) {
+        user_set.nr_periods--;
+      }
+      break;
+    case SET_PER_LENGTH:
+      if (user_set.play_time[0] < 61) {
+        set_user_play_time(0);
+      } else {
+        set_user_play_time(user_set.play_time[0] - 60);
+      }
+      break;
+    case SET_HT_LENGTH:
+      if (user_set.break_time[0] < 61) {
+        set_user_break_time(0);
+      } else {
+        set_user_break_time(user_set.break_time[0] - 60);
+      }    
+      break;
+    case SET_CHG_TIME:
+      if (user_set.change_time > 0) {
+        user_set.change_time--;
+      }
+      break;
+    default:
+      return;
+  }
+}
+
+// Select the next item to update...
+void setNextItem(void) {
+  set_mode_item++;
+  if (set_mode_item > MAX_SET_MODE) {
+    set_mode_item = MIN_SET_MODE;
+  }
+}
+
+/*
+ *   END of SET mode
+ */
 // We have kickoff! (the start of any period of play)
 void startGame(void) {
   SET_BIT(game.state, GAME_STARTED);
@@ -130,13 +253,23 @@ void startBreak(void) {
   }
 }
 
+void updateFromTemplate(void) {
+  if (isUserSet()) {
+    game.play_time = user_set.play_time[game.period - 1];
+    game.time_to_go = user_set.play_time[game.period - 1];
+    game.break_time = user_set.break_time[game.period - 1];
+  } else {
+    game.play_time = game_templates[game.template].play_time[game.period - 1];
+    game.time_to_go = game_templates[game.template].play_time[game.period - 1];
+    game.break_time = game_templates[game.template].break_time[game.period - 1];
+  }
+}
+
 // Halftime (or our break) has ended... ready to kickoff!
 // We start by incrementing the game.period by one and resetting the times...
 void endBreak(void) {
   game.period++;
-  game.play_time = game_templates[game.template].play_time[game.period - 1];
-  game.time_to_go = game_templates[game.template].play_time[game.period - 1];
-  game.break_time = game_templates[game.template].break_time[game.period - 1];
+  updateFromTemplate();
   game.added_time = 0;
   text_layer_set_text(text_state_layer, "Ready to Play");
   REMOVE_BIT(game.state, GAME_HALFTIME);
@@ -223,23 +356,31 @@ void doNothing(void) {
 
 void setGameTemplate(int template_no) {
   if (!isGameKickedOff()) {
-    text_layer_set_text(text_state_layer, game_templates[template_no].name);
-    game.time_to_go = game_templates[template_no].play_time[game.period - 1];
-    game.break_time = game_templates[template_no].break_time[game.period - 1];
-    game.penalty_time = game_templates[template_no].penalty_time;
+    if (isUserSet()) {
+      text_layer_set_text(text_state_layer, user_set.name);
+      game.time_to_go = user_set.play_time[game.period - 1];
+      game.break_time = user_set.break_time[game.period - 1];
+      game.penalty_time = user_set.penalty_time;
+      game.change_time = user_set.change_time;
+      game.nr_periods = user_set.nr_periods;      
+    } else {
+      text_layer_set_text(text_state_layer, game_templates[template_no].name);
+      game.time_to_go = game_templates[template_no].play_time[game.period - 1];
+      game.break_time = game_templates[template_no].break_time[game.period - 1];
+      game.penalty_time = game_templates[template_no].penalty_time;
+      game.change_time = game_templates[template_no].change_time;
+      game.nr_periods = game_templates[template_no].nr_periods;
+    }
     if (!usePenalty()) {
       text_layer_set_text(text_penalty_time_layer, "");
     }
-    game.change_time = game_templates[template_no].change_time;
-    game.nr_periods = game_templates[template_no].nr_periods;
   }
 }
 
 void gameSetMode(void) {
-  // TODO: Let's change this around entirely and put us into "GAME_SET" mode now.
-  //       If in GAME_SET mode, let's just exit
+  // If we're in user_set mode (template = -1), this will reset to 0
   game.template++;
-  // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))){
+  // TODO: if (game.template >= (sizeof(game_templates) / sizeof(GameTemplate))) {
   if (game.template > NrTemplates) {
     game.template = 0;
   }
@@ -263,7 +404,9 @@ void resetGame(void) {
  *   Now for the button pressing handlers
  */
 static void down_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (!isGameKickedOff()) {
+  if (inSetMode()) {
+    setDecrement(); // this will decrement the object
+  } else if (!isGameKickedOff()) {
     gameSetMode();
   }
 }
@@ -275,7 +418,9 @@ static void down_long_click_handler(ClickRecognizerRef recognizer, void *context
 }
 
 static void up_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (isGameEnded()) {
+  if (inSetMode()) {
+    setIncrement(); // this will be an increment the object
+  } else if (isGameEnded()) {
     doNothing();
   } else if (isGameRunning()) {
     text_layer_set_text(text_state_layer, "Game Paused");
@@ -289,7 +434,7 @@ static void up_single_click_handler(ClickRecognizerRef recognizer, void *context
 }
 
 static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (isGameEnded()) {
+  if (inSetMode() || isGameEnded()) {
     doNothing();
   } else if (!isGameKickedOff() || isGameReady()) {
     startGame();
@@ -318,11 +463,17 @@ static void up_double_click(ClickRecognizerRef recognizer, void *context) {
   }
 }
 
+static void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
+  if (inSetMode()) {
+    setNextItem(); // this will step through items
+  }
+}
+
 static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (isGameEnded()) {
     doNothing();
   } else if (!isGameKickedOff()) {
-    gameSetMode();
+    enableSetMode();
   } else if (!isGameBreak() && !isGamePaused()) {
       text_layer_set_text(text_state_layer, "Player Change");
       game.added_time = game.added_time + game.change_time;
@@ -434,11 +585,12 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 void config_provider(void *context) {
   // Single clicks
   window_single_click_subscribe(BUTTON_ID_UP, up_single_click_handler);
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, down_single_click_handler);
   
   // Long clicks
-  window_long_click_subscribe(BUTTON_ID_SELECT, 500, select_long_click_handler, NULL);
   window_long_click_subscribe(BUTTON_ID_UP, 500, up_long_click_handler, NULL);
+  window_long_click_subscribe(BUTTON_ID_SELECT, 500, select_long_click_handler, NULL);
   window_long_click_subscribe(BUTTON_ID_DOWN, 500, down_long_click_handler, NULL);
   
   // Double clicks
@@ -446,6 +598,8 @@ void config_provider(void *context) {
 }
 
 void handle_init(void) {
+  app_mode     = MODE_GAME;
+
   /* GUI Init */
   my_window = window_create();
   window_stack_push(my_window, true /* Animated */);
