@@ -45,7 +45,7 @@ const GameTemplate game_templates[] = {
 };
 
 // Structure for SET mode. Allow the user to change nr_periods, play_time, break_time, change_time
-struct GameTemplate user_set = {"User Set  ",2,{2700,2700,0,0,0,0},{300,300,0,0,0,0},0,15,0};
+GameTemplate user_set = {"User Set  ",2,{2700,2700,0,0,0,0},{300,300,0,0,0,0},0,15,0};
 
 /* Define the number of templates above, not including the Test template */
 #define NrTemplates 2
