@@ -246,12 +246,22 @@ void gameSetMode(void) {
   setGameTemplate(game.template);
 }
 
+void resetGame(void) {
+  game.state = GAME_UNSTARTED;
+  setGameTemplate(game.template);
+}
 /*
  *   Now for the button pressing handlers
  */
 static void down_single_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (!isGameKickedOff()) {
     gameSetMode();
+  }
+}
+
+static void down_long_click_handler(ClickRecognizerRef recognizer, void *context) {
+  if (isGameEnded()) {
+    resetGame();
   }
 }
 
@@ -413,10 +423,16 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 void config_provider(void *context) {
+  // Single clicks
   window_single_click_subscribe(BUTTON_ID_UP, up_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, down_single_click_handler);
+  
+  // Long clicks
   window_long_click_subscribe(BUTTON_ID_SELECT, 500, select_long_click_handler, NULL);
   window_long_click_subscribe(BUTTON_ID_UP, 500, up_long_click_handler, NULL);
+  window_long_click_subscribe(BUTTON_ID_DOWN, 500, down_long_click_handler, NULL);
+  
+  // Double clicks
   window_multi_click_subscribe(BUTTON_ID_UP, 2, 0, 500, true, up_double_click);
 }
 
