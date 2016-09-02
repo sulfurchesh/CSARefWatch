@@ -29,8 +29,9 @@ typedef struct {
 
 const GameTemplate game_templates[] = {
   {"Test!!!   ",2,{30,30},{45,45},0,10,0},                    /* 11: TEST. 2x.5, HT: .75m */
-  {"2x45/5    ",2,{2700,2700},{300,300},0,0,0},                /*  0: 2x45, HT: 5m */
+  {"OUA 45/10 ",2,{2700,2700},{600,600},0,30,0},               /*  1: OUA - 2x45, HT: 10m */
   {"L1O 45/15 ",2,{2700,2700},{900,900},0,30,0},               /*  1: L1O - 2x45, HT: 15m */
+  {"2x45/5    ",2,{2700,2700},{300,300},0,0,0},                /*  0: 2x45, HT: 5m */
   {"2x45+10/5 ",4,{2700,2700,600,600},{300,300,0,0},0,0,0},  /*  2: 2x45, 2x10 ET, HT: 5m */
   {"OPDL 13/14",3,{1500,1500,1500},{480,480,480},0,30,0},      /*  3: OPDL U13/14 - 3x25, HT: 8m */
   {"OPDL 15+  ",2,{2400,2400},{600,600},0,30,0},               /*  4: OPDL U15/16 - 2x40, HT: 10m */
@@ -48,7 +49,7 @@ const GameTemplate game_templates[] = {
 GameTemplate user_set = {"User Set  ",2,{2700,2700,0,0,0,0},{300,300,0,0,0,0},0,15,0};
 
 /* Define the number of templates above, not including the Test template */
-#define NrTemplates 2
+#define NrTemplates 3
 
 #define TRUE     1
 #define FALSE    0
