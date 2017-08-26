@@ -64,7 +64,7 @@
             }
         ]
     },
-    "sdkVersion": "2",
+    "sdkVersion": "3",
     "shortName": "CSARefWatch",
     "uuid": "be472ec2-11d8-42a9-81c4-a7b9d7ad353e",
     "versionCode": 1,
@@ -72,4 +72,9 @@
     "watchapp": {
         "watchface": false
     }
+    "targetPlatforms": [
+        "aplite",
+        "basalt",
+        "chalk"
+    ]
 }
