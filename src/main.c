@@ -135,6 +135,34 @@ void enableSetMode(void) {
   }
 }
 
+void resetColors(void) {
+  text_layer_set_background_color(text_period_layer,GColorWhite);
+  text_layer_set_text_color(text_period_layer,GColorBlack);
+  text_layer_set_background_color(text_togo_layer,GColorWhite);
+  text_layer_set_text_color(text_togo_layer,GColorBlack);
+  text_layer_set_background_color(text_break_time_layer,GColorWhite);
+  text_layer_set_text_color(text_break_time_layer,GColorBlack);
+  return;
+}
+
+void updateSetMode(void) {
+  resetColors();
+  switch (set_mode_item) {
+    case SET_PERIODS:
+      text_layer_set_background_color(text_period_layer,GColorBlue);
+      text_layer_set_text_color(text_period_layer,GColorYellow);
+    case SET_PER_LENGTH:
+      text_layer_set_background_color(text_togo_layer,GColorBlue);
+      text_layer_set_text_color(text_togo_layer,GColorYellow);
+    case SET_HT_LENGTH:
+      text_layer_set_background_color(text_break_time_layer,GColorBlue);
+      text_layer_set_text_color(text_break_time_layer,GColorYellow);
+    case SET_CHG_TIME:
+    default:
+      return;
+  }
+}
+
 void set_user_play_time(int amount) {
   unsigned int i;
   for (i = 0; i < user_set.nr_periods; i++) {
@@ -222,34 +250,6 @@ void setNextItem(void) {
     set_mode_item = MIN_SET_MODE;
   }
   updateSetMode();
-}
-
-void updateSetMode(void) {
-  resetColors();
-  switch (set_mode_item) {
-    case SET_PERIODS:
-      text_layer_set_background_color(text_period_layer,GColorBlue);
-      text_layer_set_text_color(text_period_layer,GColorYellow);
-    case SET_PER_LENGTH:
-      text_layer_set_background_color(text_togo_layer,GColorBlue);
-      text_layer_set_text_color(text_togo_layer,GColorYellow);
-    case SET_HT_LENGTH:
-      text_layer_set_background_color(text_break_time_layer,GColorBlue);
-      text_layer_set_text_color(text_break_time_layer,GColorYellow);
-    case SET_CHG_TIME:
-    default:
-      return;
-  }
-}
-
-void resetColors(void) {
-  text_layer_set_background_color(text_period_layer,GColorWhite);
-  text_layer_set_text_color(text_period_layer,GColorBlack);
-  text_layer_set_background_color(text_togo_layer,GColorWhite);
-  text_layer_set_text_color(text_togo_layer,GColorBlack);
-  text_layer_set_background_color(text_break_time_layer,GColorWhite);
-  text_layer_set_text_color(text_break_time_layer,GColorBlack);
-  return;
 }
 // END of SET mode
 
