@@ -28,10 +28,11 @@ typedef struct {
 } GameTemplate;
 
 const GameTemplate game_templates[] = {
-  {"2x30/5    ",2,{1800,1800},{300,300},0,0,0},                /*  6: 2x30, HT: 5m */
-  {"OUA 45/10 ",2,{2700,2700},{600,600},0,30,0},               /*  1: OUA - 2x45, HT: 10m */
-  {"L1O 45/15 ",2,{2700,2700},{900,900},0,30,0},               /*  1: L1O - 2x45, HT: 15m */
+  {"OUA 45/10 ",3,{2700,2700,300},{600,600},0,30,0},           /*  1: OUA - 2x45, HT: 10m */
   {"2x45/5    ",2,{2700,2700},{300,300},0,0,0},                /*  0: 2x45, HT: 5m */
+  {"2x30/5    ",2,{1800,1800},{300,300},0,0,0},                /*  6: 2x30, HT: 5m */
+  {"L1O 45/15 ",2,{2700,2700},{900,900},0,30,0},               /*  1: L1O - 2x45, HT: 15m */
+  {"ClipTour  ",2,{ 900, 900},{300,300},0,0,0},                /* Clippers tourney */
   {"KUSC      ",2,{1200,1200},{300,300},0,0,0},                /* KUSC tourney */
   {"KUSC Final",4,{1200,1200,300,300},{300,0,0,0},0,0,0},      /* KUSC tourney Final */
   {"2x45+10/5 ",4,{2700,2700,600,600},{300,300,0,0},0,0,0},    /*  2: 2x45, 2x10 ET, HT: 5m */
@@ -51,7 +52,7 @@ const GameTemplate game_templates[] = {
 GameTemplate user_set = {"User Set  ",2,{2700,2700,0,0,0,0},{300,300,0,0,0,0},0,15,0};
 
 /* Define the number of templates above, not including the Test template */
-#define NrTemplates 4
+#define NrTemplates 5
 
 #define TRUE     1
 #define FALSE    0
@@ -155,12 +156,18 @@ void setIncrement(void) {
       if (user_set.nr_periods < MAX_USER_PERIODS) {
         user_set.nr_periods++;
       }
+      snprintf(period_buffer, sizeof(period_buffer), "%d",  game.period);
+      text_layer_set_text(text_period_layer, period_buffer);      
       break;
     case SET_PER_LENGTH:
       set_user_play_time(user_set.play_time[0] + 60);
+      snprintf(time_to_go_buffer, sizeof(time_to_go_buffer), "%.2d:%.2d", game.time_to_go / 60, game.time_to_go % 60);
+      text_layer_set_text(text_togo_layer, time_to_go_buffer);
       break;
     case SET_HT_LENGTH:
-        set_user_break_time(user_set.break_time[0] + 60);
+      set_user_break_time(user_set.break_time[0] + 60);
+      snprintf(break_time_buffer, sizeof(break_time_buffer), "P %.2d:%.2d", game.break_time / 60, game.break_time % 60);
+      text_layer_set_text(text_break_time_layer, break_time_buffer);
       break;
     case SET_CHG_TIME:
       user_set.change_time++;
@@ -177,6 +184,8 @@ void setDecrement(void) {
       if (user_set.nr_periods > 0) {
         user_set.nr_periods--;
       }
+      snprintf(period_buffer, sizeof(period_buffer), "%d",  game.period);
+      text_layer_set_text(text_period_layer, period_buffer);
       break;
     case SET_PER_LENGTH:
       if (user_set.play_time[0] < 61) {
@@ -184,13 +193,17 @@ void setDecrement(void) {
       } else {
         set_user_play_time(user_set.play_time[0] - 60);
       }
+      snprintf(time_to_go_buffer, sizeof(time_to_go_buffer), "%.2d:%.2d", game.time_to_go / 60, game.time_to_go % 60);
+      text_layer_set_text(text_togo_layer, time_to_go_buffer);
       break;
     case SET_HT_LENGTH:
       if (user_set.break_time[0] < 61) {
         set_user_break_time(0);
       } else {
         set_user_break_time(user_set.break_time[0] - 60);
-      }    
+      }
+      snprintf(break_time_buffer, sizeof(break_time_buffer), "P %.2d:%.2d", game.break_time / 60, game.break_time % 60);
+      text_layer_set_text(text_break_time_layer, break_time_buffer);
       break;
     case SET_CHG_TIME:
       if (user_set.change_time > 0) {
@@ -209,10 +222,8 @@ void setNextItem(void) {
     set_mode_item = MIN_SET_MODE;
   }
 }
+// END of SET mode
 
-/*
- *   END of SET mode
- */
 // We have kickoff! (the start of any period of play)
 void startGame(void) {
   SET_BIT(game.state, GAME_STARTED);
