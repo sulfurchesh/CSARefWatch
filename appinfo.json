@@ -1,80 +1,83 @@
 {
-    "appKeys": {},
-    "capabilities": [
-        ""
-    ],
-    "companyName": "Alex Fletcher",
-    "longName": "CSA Referee Watch",
-    "projectType": "native",
-    "resources": {
-        "media": [
-            {
-                "file": "images/Icon.png",
-                "menuIcon": true,
-                "name": "APP_ICON",
-                "type": "png"
-            },
-            {
-                "compatibility": "2.7",
-                "file": "fonts/UniversElse-Regular.ttf",
-                "name": "FONT_UNIVERSELSE_12",
-                "type": "font"
-            },
-            {
-                "compatibility": "2.7",
-                "file": "fonts/UniversElse-Regular.ttf",
-                "name": "FONT_UNIVERSELSE_40",
-                "type": "font"
-            },
-            {
-                "compatibility": "2.7",
-                "file": "fonts/UniversElse-Regular.ttf",
-                "name": "FONT_UNIVERSELSE_36",
-                "type": "font"
-            },
-            {
-                "compatibility": "2.7",
-                "file": "fonts/UniversElse-Regular.ttf",
-                "name": "FONT_UNIVERSELSE_30",
-                "type": "font"
-            },
-            {
-                "compatibility": "2.7",
-                "file": "fonts/UniversElse-Regular.ttf",
-                "name": "FONT_UNIVERSELSE_24",
-                "type": "font"
-            },
-            {
-                "compatibility": "2.7",
-                "file": "fonts/UniversElse-Regular.ttf",
-                "name": "FONT_UNIVERSELSE_18",
-                "type": "font"
-            },
-            {
-                "compatibility": "2.7",
-                "file": "fonts/UniversElse-Regular.ttf",
-                "name": "FONT_UNIVERSELSE_14",
-                "type": "font"
-            },
-            {
-                "compatibility": "2.7",
-                "file": "fonts/UniversElse-Regular.ttf",
-                "name": "FONT_UNIVERSELSE_28",
-                "type": "font"
-            }
-        ]
+    "author": "Alex Fletcher",
+    "dependencies": {},
+    "keywords": [],
+    "name": "csarefwatch",
+    "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
+        "displayName": "CSA Referee Watch",
+        "enableMultiJS": true,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/Icon.png",
+                    "menuIcon": true,
+                    "name": "APP_ICON",
+                    "type": "png"
+                },
+                {
+                    "compatibility": "2.7",
+                    "file": "fonts/UniversElse-Regular.ttf",
+                    "name": "FONT_UNIVERSELSE_28",
+                    "type": "font"
+                },
+                {
+                    "compatibility": "2.7",
+                    "file": "fonts/UniversElse-Regular.ttf",
+                    "name": "FONT_UNIVERSELSE_14",
+                    "type": "font"
+                },
+                {
+                    "compatibility": "2.7",
+                    "file": "fonts/UniversElse-Regular.ttf",
+                    "name": "FONT_UNIVERSELSE_18",
+                    "type": "font"
+                },
+                {
+                    "compatibility": "2.7",
+                    "file": "fonts/UniversElse-Regular.ttf",
+                    "name": "FONT_UNIVERSELSE_24",
+                    "type": "font"
+                },
+                {
+                    "compatibility": "2.7",
+                    "file": "fonts/UniversElse-Regular.ttf",
+                    "name": "FONT_UNIVERSELSE_30",
+                    "type": "font"
+                },
+                {
+                    "compatibility": "2.7",
+                    "file": "fonts/UniversElse-Regular.ttf",
+                    "name": "FONT_UNIVERSELSE_36",
+                    "type": "font"
+                },
+                {
+                    "compatibility": "2.7",
+                    "file": "fonts/UniversElse-Regular.ttf",
+                    "name": "FONT_UNIVERSELSE_40",
+                    "type": "font"
+                },
+                {
+                    "compatibility": "2.7",
+                    "file": "fonts/UniversElse-Regular.ttf",
+                    "name": "FONT_UNIVERSELSE_12",
+                    "type": "font"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt"
+        ],
+        "uuid": "be472ec2-11d8-42a9-81c4-a7b9d7ad353e",
+        "watchapp": {
+            "watchface": false
+        }
     },
-    "sdkVersion": "3",
-    "shortName": "CSARefWatch",
-    "uuid": "be472ec2-11d8-42a9-81c4-a7b9d7ad353e",
-    "versionCode": 1,
-    "versionLabel": "1.1",
-    "watchapp": {
-        "watchface": false
-    }
-    "targetPlatforms": [
-        "aplite",
-        "basalt",
-        "chalk"
-    ]
+    "version": "1.1.0"
 }
